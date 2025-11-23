@@ -1,0 +1,4640 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>SISTEM ADMINISTRASI PAGAR NUSA BUMI PANJALU</title>
+    <!-- Font Awesome untuk ikon -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+
+    <style>
+      /* --- AGAR TAMPILAN SAMA PERSIS SEPERTI WEB --- */
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        overflow-x: hidden; /* Biar tidak geser kanan */
+        -webkit-text-size-adjust: 100%; /* Biar font tidak membesar sendiri di Android */
+      }
+
+      /* Menjaga proporsi semua elemen seperti di web */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      /* Gambar otomatis menyesuaikan layar HP tetapi tidak mengubah desain */
+      img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+      }
+
+      /* Elemen layout utama tetap seperti di web */
+      .container,
+      .wrapper,
+      .main-content {
+        width: 100%;
+        max-width: 1200px; /* sama seperti tampilan web besar */
+        margin: 0 auto; /* center seperti web */
+      }
+
+      /* Supaya elemen tidak meledak di layar kecil */
+      section,
+      div {
+        max-width: 100%;
+      }
+
+      /* Tombol tetap rapi & tidak gede di Android */
+      button {
+        font-size: inherit;
+      }
+
+      /* Input tetap tampil seperti di web */
+      input,
+      select,
+      textarea {
+        font-size: 16px; /* cegah zoom otomatis Android */
+      }
+
+      :root {
+        --bg: #f4f7fb;
+        --card: #ffffff;
+        --accent: #0b5ed7;
+        --accent-light: #4a94ff;
+        --accent-dark: #07bb0a;
+        --muted: #6b7280;
+        --glass: rgba(255, 255, 255, 0.6);
+        --success: #16a34a;
+        --danger: #dc2626;
+        --warning: #f59e0b;
+        --sidebar-bg: linear-gradient(180deg, #0b5ed7, #0fb085);
+        --shadow: 0 6px 18px rgba(11, 78, 215, 0.08);
+        --shadow-lg: 0 12px 24px rgba(11, 78, 215, 0.12);
+        --radius: 12px;
+        --sidebar-width: 280px;
+        --sidebar-collapsed-width: 70px;
+      }
+
+      * {
+        box-sizing: border-box;
+        font-family: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+      }
+
+      body {
+        margin: 0;
+        background: linear-gradient(180deg, #eef2ff 0%, var(--bg) 100%);
+        color: #111;
+        overflow-x: hidden;
+      }
+
+      /* Splash Screen Styles - Mobile Optimized */
+      .splash-screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #120041, #120041);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        transition: opacity 0.8s ease-out, visibility 0.8s ease-out;
+      }
+
+      .splash-screen.hidden {
+        opacity: 0;
+        visibility: hidden;
+      }
+
+      .logo-container {
+        position: relative;
+        animation: float 3s ease-in-out infinite;
+      }
+
+      @keyframes float {
+        0% {
+          transform: translateY(0px);
+        }
+        50% {
+          transform: translateY(-20px);
+        }
+        100% {
+          transform: translateY(0px);
+        }
+      }
+
+      .logo-circle {
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .logo-circle::before {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(
+          45deg,
+          transparent,
+          rgba(255, 255, 255, 0.1),
+          transparent
+        );
+        transform: rotate(45deg);
+        animation: shine 3s infinite;
+      }
+      .logo-circle {
+        background: transparent;
+        box-shadow: none;
+      }
+
+      .logo-image {
+        background: transparent;
+      }
+
+      @keyframes shine {
+        0% {
+          transform: rotate(45deg) translateY(-100%);
+        }
+        50% {
+          transform: rotate(45deg) translateY(100%);
+        }
+        100% {
+          transform: rotate(45deg) translateY(100%);
+        }
+      }
+
+      .logo-image {
+        width: 160px;
+        height: 160px;
+        object-fit: contain;
+        z-index: 2;
+      }
+
+      .splash-title {
+        color: white;
+        font-size: 24px;
+        font-weight: 700;
+        margin-top: 30px;
+        text-align: center;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        animation: fadeIn 1.5s ease-out;
+      }
+
+      .splash-subtitle {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 16px;
+        margin-top: 10px;
+        text-align: center;
+        animation: fadeIn 1.5s ease-out 0.5s both;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .loading-bar {
+        width: 200px;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 2px;
+        margin-top: 30px;
+        overflow: hidden;
+        animation: fadeIn 1.5s ease-out 1s both;
+      }
+
+      .loading-progress {
+        height: 100%;
+        width: 0;
+        background: white;
+        border-radius: 2px;
+        animation: loading 2.5s ease-out forwards;
+      }
+
+      @keyframes loading {
+        0% {
+          width: 0;
+        }
+        100% {
+          width: 100%;
+        }
+      }
+
+      .app {
+        display: grid;
+        grid-template-columns: var(--sidebar-width) 1fr;
+        min-height: 100vh;
+        transition: grid-template-columns 0.3s ease;
+      }
+
+      .app.sidebar-collapsed {
+        grid-template-columns: var(--sidebar-collapsed-width) 1fr;
+      }
+
+      .sidebar {
+        background: var(--sidebar-bg);
+        color: #fff;
+        padding: 24px;
+        box-shadow: 4px 0 12px rgba(0, 0, 0, 0.08);
+        position: relative;
+        overflow: hidden;
+        transition: width 0.3s ease;
+        width: var(--sidebar-width);
+        z-index: 100;
+      }
+
+      .sidebar-collapsed .sidebar {
+        width: var(--sidebar-collapsed-width);
+        padding: 24px 10px;
+      }
+
+      .sidebar::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/></svg>');
+        background-size: 20px 20px;
+        z-index: 0;
+      }
+
+      .sidebar-toggle {
+        position: absolute;
+        top: 20px;
+        right: -15px;
+        width: 30px;
+        height: 30px;
+        background: var(--accent);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        z-index: 10;
+        transition: all 0.3s ease;
+      }
+
+      .sidebar-toggle:hover {
+        background: var(--accent-dark);
+        transform: scale(1.1);
+      }
+
+      .sidebar-toggle i {
+        color: white;
+        font-size: 14px;
+        transition: transform 0.3s ease;
+      }
+
+      .sidebar-collapsed .sidebar-toggle i {
+        transform: rotate(180deg);
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 32px;
+        position: relative;
+        z-index: 1;
+        transition: all 0.3s ease;
+      }
+
+      .sidebar-collapsed .brand {
+        justify-content: center;
+        gap: 0;
+      }
+
+      .brand-logo {
+        width: 48px;
+        height: 48px;
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        color: white;
+        flex-shrink: 0;
+        transition: all 0.3s ease;
+      }
+
+      .sidebar-collapsed .brand-logo {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+      }
+
+      .brand-text {
+        font-weight: 700;
+        font-size: 16px;
+        line-height: 1.3;
+        white-space: nowrap;
+        overflow: hidden;
+        opacity: 1;
+        transition: opacity 0.3s ease;
+      }
+
+      .sidebar-collapsed .brand-text {
+        opacity: 0;
+        width: 0;
+      }
+
+      .nav {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        position: relative;
+        z-index: 1;
+      }
+
+      .nav button {
+        background: transparent;
+        border: none;
+        color: rgba(255, 255, 255, 0.8);
+        padding: 12px 16px;
+        border-radius: var(--radius);
+        text-align: left;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        position: relative;
+      }
+
+      .sidebar-collapsed .nav button {
+        padding: 12px;
+        justify-content: center;
+        gap: 0;
+      }
+
+      .nav button:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        transform: translateX(4px);
+      }
+
+      .sidebar-collapsed .nav button:hover {
+        transform: none;
+      }
+
+      .nav button.active {
+        background: rgba(255, 255, 255, 0.15);
+        color: white;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .nav button i {
+        width: 20px;
+        text-align: center;
+        flex-shrink: 0;
+      }
+
+      .nav button span {
+        white-space: nowrap;
+        overflow: hidden;
+        transition: opacity 0.3s ease;
+      }
+
+      .sidebar-collapsed .nav button span {
+        opacity: 0;
+        width: 0;
+      }
+
+      /* Tooltip for collapsed sidebar */
+      .nav button::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        left: 100%;
+        margin-left: 10px;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 5px 10px;
+        border-radius: 4px;
+        white-space: nowrap;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s;
+        z-index: 1000;
+        font-size: 14px;
+      }
+
+      .sidebar-collapsed .nav button:hover::after {
+        opacity: 1;
+      }
+
+      .sidebar-status {
+        margin-top: auto;
+        font-size: 13px;
+        opacity: 0.9;
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+      }
+
+      .sidebar-collapsed .sidebar-status {
+        justify-content: center;
+      }
+
+      .sidebar-status span {
+        white-space: nowrap;
+        overflow: hidden;
+        transition: opacity 0.3s ease;
+      }
+
+      .sidebar-collapsed .sidebar-status span {
+        opacity: 0;
+        width: 0;
+      }
+
+      .content {
+        padding: 24px;
+        max-width: 1400px;
+        margin: 0 auto;
+        width: 100%;
+        transition: margin-left 0.3s ease;
+      }
+
+      .topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        padding: 16px 24px;
+        background: white;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+      }
+
+      .topbar h2 {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 700;
+        color: #1f2937;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .topbar h2 i {
+        color: var(--accent);
+      }
+
+      .card {
+        background: var(--card);
+        padding: 24px;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+      }
+
+      .card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: var(--accent);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      .card:hover::before {
+        opacity: 1;
+      }
+
+      .card h3 {
+        margin: 0 0 16px 0;
+        font-size: 18px;
+        font-weight: 600;
+        color: #1f2937;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .card h3 i {
+        color: var(--accent);
+        font-size: 16px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+      }
+
+      /* Added grid-4 for participant statistics */
+      .grid-4 {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 20px;
+      }
+
+      .full {
+        grid-column: 1/-1;
+      }
+
+      .form-row {
+        display: flex;
+        gap: 16px;
+      }
+
+      .form-row > * {
+        flex: 1;
+      }
+
+      label {
+        display: block;
+        font-size: 14px;
+        margin-bottom: 8px;
+        color: var(--muted);
+        font-weight: 500;
+      }
+
+      input,
+      select,
+      textarea {
+        width: 100%;
+        padding: 12px 16px;
+        border-radius: 8px;
+        border: 1px solid #e6edf7;
+        background: #fbfdff;
+        transition: all 0.2s ease;
+        font-family: inherit;
+      }
+
+      input:disabled,
+      select:disabled {
+        background: #f3f4f6;
+        cursor: not-allowed;
+        opacity: 0.7;
+      }
+
+      input:focus,
+      select:focus,
+      textarea:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(11, 94, 215, 0.1);
+      }
+
+      /* slideshow */
+      .slideshow {
+        position: relative;
+        overflow: hidden;
+        border-radius: var(--radius);
+        height: 200px;
+        box-shadow: var(--shadow);
+      }
+
+      .slides {
+        display: flex;
+        transition: transform 0.5s ease;
+      }
+
+      .slide {
+        min-width: 100%;
+        padding: 32px;
+        color: #fff;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        position: relative;
+      }
+
+      .slide::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(
+          135deg,
+          rgba(0, 0, 0, 0.1) 0%,
+          rgba(0, 0, 0, 0) 100%
+        );
+      }
+
+      .slide h3 {
+        margin: 0 0 12px;
+        font-size: 24px;
+        font-weight: 700;
+        position: relative;
+        z-index: 1;
+      }
+
+      .slide p {
+        margin: 0;
+        font-size: 16px;
+        opacity: 0.9;
+        position: relative;
+        z-index: 1;
+      }
+
+      /* Indicators for slideshow */
+      .slideshow-indicators {
+        position: absolute;
+        bottom: 16px;
+        left: 0;
+        right: 0;
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+      }
+
+      .indicator {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.5);
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .indicator.active {
+        background: white;
+        width: 24px;
+        border-radius: 4px;
+      }
+
+      /* table */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th,
+      td {
+        padding: 12px 16px;
+        border-bottom: 1px solid #eef2f7;
+        text-align: left;
+      }
+
+      th {
+        background: #fbfdff;
+        font-weight: 600;
+        color: #4b5563;
+      }
+
+      tr:hover {
+        background: #f8fafc;
+      }
+
+      /* small helpers */
+      .muted {
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 10px 16px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        font-family: inherit;
+      }
+
+      .btn-primary {
+        background: var(--accent);
+        color: #fff;
+      }
+
+      .btn-primary:hover {
+        background: var(--accent-dark);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(11, 94, 215, 0.2);
+      }
+
+      .btn-ghost {
+        background: transparent;
+        border: 1px solid #e6edf7;
+        color: #4b5563;
+      }
+
+      .btn-ghost:hover {
+        background: #f8fafc;
+        border-color: #d1d9e0;
+      }
+
+      .btn-danger {
+        background: var(--danger);
+        color: white;
+      }
+
+      .btn-danger:hover {
+        background: #b91c1c;
+      }
+
+      .btn-success {
+        background: var(--success);
+        color: white;
+      }
+
+      .btn-success:hover {
+        background: #15803d;
+      }
+
+      .flex {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+      }
+
+      /* Status badges */
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 500;
+      }
+
+      .badge-success {
+        background: rgba(22, 163, 74, 0.1);
+        color: var(--success);
+      }
+
+      .badge-warning {
+        background: rgba(245, 158, 11, 0.1);
+        color: var(--warning);
+      }
+
+      .badge-danger {
+        background: rgba(220, 38, 38, 0.1);
+        color: var(--danger);
+      }
+
+      /* Modal styles */
+      .modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+      }
+
+      .modal-content {
+        background: white;
+        padding: 24px;
+        border-radius: var(--radius);
+        max-width: 400px;
+        width: 90%;
+        box-shadow: var(--shadow-lg);
+      }
+
+      .modal-header {
+        margin-bottom: 20px;
+      }
+
+      .modal-header h3 {
+        margin: 0;
+        color: #1f2937;
+      }
+
+      .modal-footer {
+        margin-top: 20px;
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+      }
+
+      /* Nota list styles */
+      .nota-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 16px;
+        margin-top: 20px;
+      }
+
+      .nota-card {
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: var(--radius);
+        padding: 16px;
+        transition: all 0.2s ease;
+        cursor: pointer;
+      }
+
+      .nota-card:hover {
+        border-color: var(--accent);
+        box-shadow: var(--shadow);
+        transform: translateY(-2px);
+      }
+
+      .nota-card.selected {
+        border-color: var(--accent);
+        background: #f0f7ff;
+      }
+
+      .nota-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+
+      .nota-id {
+        font-weight: 600;
+        color: var(--accent);
+      }
+
+      .nota-status {
+        font-size: 12px;
+        padding: 4px 8px;
+        border-radius: 4px;
+      }
+
+      .nota-details {
+        font-size: 14px;
+        color: var(--muted);
+        line-height: 1.4;
+      }
+
+      .nota-total {
+        margin-top: 12px;
+        font-weight: 600;
+        color: #1f2937;
+        font-size: 16px;
+      }
+
+      /* Participant card styles */
+      .participant-card {
+        background: white;
+        border-radius: var(--radius);
+        padding: 20px;
+        box-shadow: var(--shadow);
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+
+      .participant-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-lg);
+      }
+
+      .participant-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 16px;
+        font-size: 24px;
+        color: white;
+      }
+
+      .participant-icon.green {
+        background: linear-gradient(135deg, #16a34a, #15803d);
+      }
+
+      .participant-icon.yellow {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+      }
+
+      .participant-icon.red {
+        background: linear-gradient(135deg, #dc2626, #b91c1c);
+      }
+
+      .participant-icon.white {
+        background: linear-gradient(135deg, #6b7280, #4b5563);
+      }
+
+      .participant-icon.purple {
+        background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+      }
+
+      .participant-count {
+        font-size: 32px;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 8px;
+      }
+
+      .participant-label {
+        font-size: 16px;
+        font-weight: 600;
+        color: #4b5563;
+        margin-bottom: 4px;
+      }
+
+      .participant-desc {
+        font-size: 14px;
+        color: var(--muted);
+      }
+
+      /* printable receipt area */
+      @media print {
+        body > *:not(.receipt) {
+          display: none;
+        }
+        .receipt {
+          display: block;
+        }
+      }
+
+      /* Loading animation */
+      .loading {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: white;
+        animation: spin 0.8s ease-in-out infinite;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* Receipt styles */
+      .receipt {
+        background: white;
+        border-radius: var(--radius);
+        padding: 32px;
+        max-width: 800px;
+        margin: 0 auto;
+        box-shadow: var(--shadow);
+      }
+
+      .receipt-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        padding-bottom: 16px;
+        border-bottom: 1px dashed #e5e7eb;
+      }
+
+      .receipt-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--accent);
+        margin: 0;
+      }
+
+      .receipt-number {
+        font-size: 14px;
+        color: var(--muted);
+      }
+
+      .receipt-body {
+        margin-bottom: 24px;
+      }
+
+      .receipt-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 12px;
+      }
+
+      .receipt-total {
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px solid #e5e7eb;
+        font-weight: 600;
+        font-size: 18px;
+      }
+
+      .receipt-signature {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 40px;
+      }
+
+      .signature-box {
+        text-align: center;
+        width: 45%;
+      }
+
+      .signature-line {
+        border-bottom: 1px solid #374151;
+        margin: 40px 0 8px;
+        height: 1px;
+      }
+
+      .signature-text {
+        font-size: 14px;
+        color: var(--muted);
+      }
+
+      /* Notification */
+      .notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 16px 20px;
+        border-radius: var(--radius);
+        color: white;
+        font-weight: 500;
+        z-index: 1000;
+        display: none;
+        animation: slideIn 0.3s ease;
+        box-shadow: var(--shadow-lg);
+      }
+
+      .notification.success {
+        background: var(--success);
+      }
+
+      .notification.error {
+        background: var(--danger);
+      }
+
+      .notification.warning {
+        background: var(--warning);
+      }
+
+      @keyframes slideIn {
+        from {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+
+      /* Chart container */
+      .chart-container {
+        position: relative;
+        height: 300px;
+        width: 100%;
+        margin-top: 20px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px; /* jarak antara logo dan teks */
+      }
+
+      .brand-logo {
+        background-color: transparent; /* pastikan transparan */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .brand-logo img {
+        width: 90px;
+        height: 90px;
+        object-fit: contain;
+      }
+
+      /* Mobile Menu Toggle */
+      .mobile-menu-toggle {
+        display: none;
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 1001;
+        background: var(--accent);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+        cursor: pointer;
+        box-shadow: var(--shadow);
+      }
+
+      /* Mobile Menu Overlay */
+      .mobile-menu-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+      }
+
+      /* Mobile Sidebar */
+      .mobile-sidebar {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 280px;
+        height: 100%;
+        background: var(--sidebar-bg);
+        color: white;
+        z-index: 1000;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        overflow-y: auto;
+      }
+
+      .mobile-sidebar.active {
+        transform: translateX(0);
+      }
+
+      .mobile-sidebar .brand {
+        padding: 24px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .mobile-sidebar .nav {
+        padding: 16px;
+      }
+
+      .mobile-sidebar .nav button {
+        width: 100%;
+        padding: 16px;
+        margin-bottom: 8px;
+        border-radius: 8px;
+        justify-content: flex-start;
+      }
+
+      .mobile-sidebar .sidebar-status {
+        padding: 16px 24px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .mobile-close-btn {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+        color: white;
+        font-size: 18px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      /* Payment status highlight */
+      .payment-highlight {
+        background-color: rgba(11, 94, 215, 0.05);
+        border-left: 4px solid var(--accent);
+        padding: 12px;
+        border-radius: 8px;
+        margin-top: 16px;
+      }
+
+      .payment-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+      }
+
+      .payment-row.total {
+        font-weight: 700;
+        font-size: 16px;
+        padding-top: 8px;
+        border-top: 1px dashed #e5e7eb;
+      }
+
+      .payment-row.remaining {
+        color: var(--danger);
+        font-weight: 600;
+      }
+
+      .payment-row.paid {
+        color: var(--success);
+      }
+
+      /* Action buttons for table rows */
+      .action-buttons {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .action-buttons .btn {
+        padding: 4px 8px;
+        font-size: 12px;
+        min-height: auto;
+      }
+
+      /* Password protected access indicator */
+      .protected-access {
+        position: relative;
+      }
+
+      .protected-access::after {
+        content: "\f023";
+        font-family: "Font Awesome 6 Free";
+        font-weight: 900;
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--warning);
+        font-size: 12px;
+      }
+
+      /* Enhanced modal styling */
+      .modal-header {
+        border-bottom: 1px solid #e5e7eb;
+        padding-bottom: 16px;
+        margin-bottom: 20px;
+      }
+
+      .modal-body {
+        margin-bottom: 20px;
+      }
+
+      .modal-footer {
+        border-top: 1px solid #e5e7eb;
+        padding-top: 16px;
+        margin-top: 20px;
+      }
+
+      .password-strength {
+        margin-top: 8px;
+        height: 4px;
+        border-radius: 2px;
+        background: #e5e7eb;
+        overflow: hidden;
+      }
+
+      .password-strength-bar {
+        height: 100%;
+        transition: width 0.3s ease, background-color 0.3s ease;
+      }
+
+      .password-strength-bar.weak {
+        width: 33%;
+        background: var(--danger);
+      }
+
+      .password-strength-bar.medium {
+        width: 66%;
+        background: var(--warning);
+      }
+
+      .password-strength-bar.strong {
+        width: 100%;
+        background: var(--success);
+      }
+
+      /* ======================= ANDROID OPTIMIZATIONS ======================= */
+
+      /* Enhanced touch targets for mobile */
+      .btn {
+        padding: 14px 18px;
+        font-size: 16px;
+        min-height: 48px;
+        touch-action: manipulation;
+      }
+
+      input,
+      select,
+      textarea {
+        padding: 14px;
+        min-height: 48px;
+        font-size: 16px;
+        touch-action: manipulation;
+      }
+
+      /* Larger clickable areas */
+      .nav button {
+        padding: 16px;
+        min-height: 48px;
+      }
+
+      .mobile-menu-toggle {
+        width: 56px;
+        height: 56px;
+      }
+
+      .mobile-close-btn {
+        width: 44px;
+        height: 44px;
+      }
+
+      /* Improved table for mobile */
+      .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      table {
+        min-width: 600px;
+      }
+
+      /* Improved cards for mobile */
+      .card {
+        margin-bottom: 16px;
+      }
+
+      .participant-card {
+        padding: 16px;
+      }
+
+      .participant-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+      }
+
+      .participant-count {
+        font-size: 24px;
+      }
+
+      /* Better form layout for mobile */
+      .form-row {
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 768px) {
+        .mobile-menu-toggle {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .mobile-menu-overlay {
+          display: block;
+        }
+
+        .mobile-sidebar {
+          display: block;
+        }
+
+        .sidebar {
+          display: none;
+        }
+
+        .app {
+          grid-template-columns: 1fr;
+        }
+
+        .content {
+          padding: 16px;
+          padding-top: 80px; /* Space for mobile menu button */
+        }
+
+        .topbar {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 16px;
+          padding: 16px;
+        }
+
+        .topbar h2 {
+          font-size: 20px;
+        }
+
+        .topbar .flex {
+          width: 100%;
+          justify-content: space-between;
+        }
+
+        .grid {
+          grid-template-columns: 1fr;
+        }
+
+        .grid-4 {
+          grid-template-columns: repeat(2, 1fr);
+        }
+
+        .slideshow {
+          height: 150px;
+        }
+
+        .slide {
+          padding: 20px;
+        }
+
+        .slide h3 {
+          font-size: 18px;
+        }
+
+        .slide p {
+          font-size: 14px;
+        }
+
+        .nota-list {
+          grid-template-columns: 1fr;
+        }
+
+        .modal-content {
+          width: 95%;
+          max-width: none;
+        }
+
+        /* Make tables horizontally scrollable on mobile */
+        .card {
+          overflow-x: auto;
+        }
+
+        .participant-count {
+          font-size: 24px;
+        }
+
+        .participant-card {
+          padding: 16px;
+        }
+
+        .participant-icon {
+          width: 50px;
+          height: 50px;
+          font-size: 20px;
+        }
+
+        /* Adjust splash screen for mobile */
+        .logo-circle {
+          width: 150px;
+          height: 150px;
+        }
+
+        .logo-image {
+          width: 120px;
+          height: 120px;
+        }
+
+        .splash-title {
+          font-size: 20px;
+        }
+
+        .splash-subtitle {
+          font-size: 14px;
+        }
+
+        .loading-bar {
+          width: 150px;
+        }
+
+        /* Adjust chart container for mobile */
+        .chart-container {
+          height: 250px;
+        }
+
+        /* Enhanced mobile navigation */
+        .mobile-sidebar {
+          width: 85%;
+          max-width: 320px;
+        }
+
+        .mobile-sidebar .nav button {
+          padding: 18px 16px;
+          font-size: 16px;
+        }
+
+        /* Improved modal for mobile */
+        .modal-content {
+          padding: 20px;
+          border-radius: 16px;
+        }
+
+        .modal-header h3 {
+          font-size: 18px;
+        }
+
+        /* Better form elements for mobile */
+        input,
+        select,
+        textarea {
+          padding: 16px;
+          border-radius: 12px;
+        }
+
+        /* Enhanced buttons for mobile */
+        .btn {
+          border-radius: 12px;
+          font-weight: 600;
+        }
+
+        /* Better card spacing for mobile */
+        .card {
+          padding: 20px;
+          border-radius: 16px;
+          margin-bottom: 20px;
+        }
+
+        /* Improved payment section for mobile */
+        .payment-highlight {
+          padding: 16px;
+          border-radius: 12px;
+        }
+
+        .payment-row {
+          font-size: 16px;
+          margin-bottom: 12px;
+        }
+
+        /* Better table for mobile */
+        .table-container {
+          border-radius: 12px;
+          box-shadow: var(--shadow);
+        }
+
+        th,
+        td {
+          padding: 14px 12px;
+          font-size: 14px;
+        }
+
+        /* Enhanced nota cards for mobile */
+        .nota-card {
+          padding: 20px;
+          border-radius: 12px;
+        }
+
+        .nota-details {
+          font-size: 15px;
+          line-height: 1.5;
+        }
+
+        /* Better action buttons for mobile */
+        .action-buttons {
+          margin-top: 12px;
+        }
+
+        .action-buttons .btn {
+          padding: 8px 12px;
+          font-size: 14px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .grid-4 {
+          grid-template-columns: 1fr;
+        }
+
+        .content {
+          padding: 12px;
+          padding-top: 80px;
+        }
+
+        .topbar {
+          padding: 12px;
+        }
+
+        .card {
+          padding: 16px;
+          border-radius: 12px;
+        }
+
+        .slide {
+          padding: 16px;
+        }
+
+        .slide h3 {
+          font-size: 16px;
+        }
+
+        .slide p {
+          font-size: 13px;
+        }
+
+        .slideshow {
+          height: 120px;
+        }
+
+        .participant-card {
+          padding: 12px;
+        }
+
+        .participant-icon {
+          width: 40px;
+          height: 40px;
+          font-size: 18px;
+        }
+
+        .participant-count {
+          font-size: 20px;
+        }
+
+        .participant-label {
+          font-size: 14px;
+        }
+
+        .participant-desc {
+          font-size: 12px;
+        }
+
+        /* Enhanced form for very small screens */
+        .form-row > * {
+          margin-bottom: 12px;
+        }
+
+        /* Better buttons for very small screens */
+        .btn {
+          padding: 12px 16px;
+          font-size: 15px;
+        }
+
+        /* Enhanced inputs for very small screens */
+        input,
+        select,
+        textarea {
+          padding: 12px 16px;
+        }
+
+        /* Better modal for very small screens */
+        .modal-content {
+          padding: 16px;
+        }
+
+        /* Better table for very small screens */
+        th,
+        td {
+          padding: 10px 8px;
+          font-size: 13px;
+        }
+
+        /* Enhanced payment section for very small screens */
+        .payment-highlight {
+          padding: 12px;
+        }
+
+        .payment-row {
+          font-size: 14px;
+        }
+      }
+
+      /* Android-specific optimizations */
+      @media screen and (-webkit-min-device-pixel-ratio: 0) {
+        /* Non-retina displays */
+        input,
+        select,
+        textarea {
+          font-size: 16px;
+        }
+      }
+
+      @media screen and (-webkit-min-device-pixel-ratio: 1) and (max-width: 768px) {
+        /* Android-specific font size */
+        body {
+          font-size: 16px;
+        }
+      }
+
+      /* Touch-friendly improvements */
+      @media (hover: none) and (pointer: coarse) {
+        /* Touch devices */
+        .btn,
+        .nav button {
+          min-height: 48px;
+          min-width: 48px;
+        }
+
+        input,
+        select,
+        textarea {
+          min-height: 48px;
+        }
+
+        .nav button:hover {
+          transform: none;
+        }
+
+        .nav button:active {
+          background: rgba(255, 255, 255, 0.2);
+        }
+      }
+
+      /* Enhanced scrolling for Android */
+      @media screen and (max-width: 768px) {
+        .content {
+          -webkit-overflow-scrolling: touch;
+          overflow-y: auto;
+        }
+
+        .mobile-sidebar {
+          -webkit-overflow-scrolling: touch;
+        }
+      }
+
+      /* Improved focus states for Android */
+      @media screen and (-webkit-min-device-pixel-ratio: 0) {
+        input:focus,
+        select:focus,
+        textarea:focus,
+        button:focus {
+          outline: 2px solid var(--accent);
+          outline-offset: 2px;
+        }
+      }
+
+      /* Better text readability on Android */
+      @media screen and (max-width: 480px) {
+        body {
+          line-height: 1.5;
+        }
+
+        .card {
+          line-height: 1.6;
+        }
+
+        .muted {
+          font-size: 13px;
+        }
+      }
+
+      /* Enhanced status badges for mobile */
+      @media screen and (max-width: 768px) {
+        .badge {
+          padding: 6px 10px;
+          font-size: 13px;
+        }
+      }
+
+      /* Improved modal for mobile */
+      @media screen and (max-width: 768px) {
+        .modal {
+          padding: 20px;
+        }
+
+        .modal-content {
+          max-height: 80vh;
+          overflow-y: auto;
+        }
+      }
+
+      /* Better form validation feedback for mobile */
+      @media screen and (max-width: 768px) {
+        input:invalid,
+        select:invalid {
+          border-color: var(--danger);
+          background-color: rgba(220, 38, 38, 0.05);
+        }
+      }
+
+      /* Improved slide indicators for mobile */
+      @media screen and (max-width: 768px) {
+        .indicator {
+          width: 12px;
+          height: 12px;
+        }
+
+        .indicator.active {
+          width: 30px;
+          height: 12px;
+        }
+      }
+
+      /* Enhanced signature canvas for mobile */
+      @media screen and (max-width: 768px) {
+        #sigCanvas {
+          width: 100%;
+          max-width: 500px;
+        }
+      }
+
+      /* Better loading states for mobile */
+      @media screen and (max-width: 768px) {
+        .loading {
+          width: 20px;
+          height: 20px;
+        }
+      }
+
+      /* Enhanced notification for mobile */
+      @media screen and (max-width: 768px) {
+        .notification {
+          left: 10px;
+          right: 10px;
+          top: 10px;
+          padding: 14px 18px;
+          font-size: 15px;
+        }
+      }
+
+      /* Better password strength indicator for mobile */
+      @media screen and (max-width: 768px) {
+        .password-strength {
+          height: 6px;
+        }
+      }
+
+      /* Connection status indicator */
+      .connection-status {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        padding: 8px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 500;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.3s ease;
+      }
+
+      .connection-status.online {
+        background: rgba(22, 163, 74, 0.1);
+        color: var(--success);
+      }
+
+      .connection-status.offline {
+        background: rgba(220, 38, 38, 0.1);
+        color: var(--danger);
+      }
+
+      .connection-status.syncing {
+        background: rgba(245, 158, 11, 0.1);
+        color: var(--warning);
+      }
+
+      .connection-status i {
+        font-size: 10px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Splash Screen -->
+    <div class="splash-screen" id="splashScreen">
+      <div class="logo-container">
+        <div class="logo-circle">
+          <img src="logo1.png" alt="Logo Pagar Nusa" class="logo-image" />
+        </div>
+      </div>
+      <h1 class="splash-title">PAGAR NUSA BUMI PANJALU</h1>
+      <p class="splash-subtitle">Sistem Administrasi</p>
+      <div class="loading-bar">
+        <div class="loading-progress"></div>
+      </div>
+    </div>
+
+    <!-- Connection Status Indicator -->
+    <div class="connection-status" id="connectionStatus">
+      <i class="fas fa-circle"></i>
+      <span id="connectionText">Menghubungkan...</span>
+    </div>
+
+    <!-- Mobile Menu Toggle -->
+    <button class="mobile-menu-toggle" id="mobileMenuToggle">
+      <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Mobile Menu Overlay -->
+    <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+
+    <!-- Mobile Sidebar -->
+    <div class="mobile-sidebar" id="mobileSidebar">
+      <button class="mobile-close-btn" id="mobileCloseBtn">
+        <i class="fas fa-times"></i>
+      </button>
+
+      <div class="brand">
+        <div class="brand-logo">
+          <img
+            src="logo1.png"
+            alt="Logo Pagar Nusa"
+            style="width: 70px; height: 70px; object-fit: contain"
+          />
+        </div>
+        <div class="brand-text">
+          SISTEM ADMINISTRASI<br />
+          PAGAR NUSA BUMI PANJALU
+        </div>
+      </div>
+
+      <nav class="nav">
+        <button data-view="dashboard" class="active" data-tooltip="Dashboard">
+          <i class="fas fa-tachometer-alt"></i>
+          <span>Dashboard</span>
+        </button>
+        <button data-view="pendaftaran" data-tooltip="Pendaftaran">
+          <i class="fas fa-user-plus"></i>
+          <span>Pendaftaran</span>
+        </button>
+        <button
+          data-view="data-anggota"
+          class="protected-access"
+          data-tooltip="Data Anggota"
+        >
+          <i class="fas fa-users"></i>
+          <span>Data Anggota</span>
+        </button>
+        <button data-view="data-peserta" data-tooltip="Data Sabuk">
+          <i class="fas fa-chart-pie"></i>
+          <span>Data Sabuk</span>
+        </button>
+        <button data-view="pembayaran" data-tooltip="Pembayaran">
+          <i class="fas fa-credit-card"></i>
+          <span>Pembayaran</span>
+        </button>
+        <button data-view="nota" data-tooltip="Buat Nota">
+          <i class="fas fa-file-invoice"></i>
+          <span>Buat Nota</span>
+        </button>
+        <button data-view="pengaturan" data-tooltip="Pengaturan">
+          <i class="fas fa-cog"></i>
+          <span>Pengaturan</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-status">
+        <i class="fas fa-database"></i>
+        <span>Status penyimpanan: <span id="storageStatus">Cloud</span></span>
+      </div>
+    </div>
+
+    <div class="app" id="app">
+      <aside class="sidebar">
+        <div class="sidebar-toggle" id="sidebarToggle">
+          <i class="fas fa-chevron-left"></i>
+        </div>
+        <div class="brand">
+          <div class="brand-logo">
+            <!-- Ganti 'logo.png' dengan path logo kamu -->
+            <img
+              src="logo1.png"
+              alt="Logo Pagar Nusa"
+              style="width: 70px; height: 70px; object-fit: contain"
+            />
+          </div>
+          <div class="brand-text">
+            SISTEM ADMINISTRASI<br />
+            PAGAR NUSA BUMI PANJALU
+          </div>
+        </div>
+        <nav class="nav">
+          <button data-view="dashboard" class="active" data-tooltip="Dashboard">
+            <i class="fas fa-tachometer-alt"></i>
+            <span>Dashboard</span>
+          </button>
+          <button data-view="pendaftaran" data-tooltip="Pendaftaran">
+            <i class="fas fa-user-plus"></i>
+            <span>Pendaftaran</span>
+          </button>
+          <button
+            data-view="data-anggota"
+            class="protected-access"
+            data-tooltip="Data Anggota"
+          >
+            <i class="fas fa-users"></i>
+            <span>Data Anggota</span>
+          </button>
+          <button data-view="data-peserta" data-tooltip="Data Sabuk">
+            <i class="fas fa-chart-pie"></i>
+            <span>Data Sabuk</span>
+          </button>
+          <button data-view="pembayaran" data-tooltip="Pembayaran">
+            <i class="fas fa-credit-card"></i>
+            <span>Pembayaran</span>
+          </button>
+          <button data-view="nota" data-tooltip="Buat Nota">
+            <i class="fas fa-file-invoice"></i>
+            <span>Buat Nota</span>
+          </button>
+          <button data-view="pengaturan" data-tooltip="Pengaturan">
+            <i class="fas fa-cog"></i>
+            <span>Pengaturan</span>
+          </button>
+        </nav>
+        <div class="sidebar-status">
+          <i class="fas fa-database"></i>
+          <span>Status penyimpanan: <span id="storageStatus">Cloud</span></span>
+        </div>
+      </aside>
+
+      <main class="content">
+        <div class="topbar">
+          <h2 id="viewTitle">
+            <i class="fas fa-tachometer-alt"></i>
+            Dashboard
+          </h2>
+          <div class="flex">
+            <button class="btn btn-ghost" id="exportCSV">
+              <i class="fas fa-file-csv"></i>
+              Export CSV
+            </button>
+            <button class="btn btn-primary" id="downloadAll">
+              <i class="fas fa-file-pdf"></i>
+              Download Semua Nota (PDF)
+            </button>
+          </div>
+        </div>
+
+        <!-- Dashboard -->
+        <section id="dashboard" class="view">
+          <div class="grid">
+            <div class="card">
+              <h3>
+                <i class="fas fa-chart-pie"></i>
+                Ringkasan
+              </h3>
+              <div style="margin-top: 16px">
+                <div class="flex" style="margin-bottom: 8px">
+                  <i class="fas fa-users" style="color: var(--accent)"></i>
+                  <span>Ranting Terdaftar:</span>
+                  <strong id="summaryCount">0</strong>
+                </div>
+                <div class="flex">
+                  <i
+                    class="fas fa-money-bill-wave"
+                    style="color: var(--success)"
+                  ></i>
+                  <span>Jumlah Saldo (Rp):</span>
+                  <strong id="summaryTotal">0</strong>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <h3>
+                <i class="fas fa-tags"></i>
+                Pengaturan Harga
+              </h3>
+              <div class="form-row" style="margin-top: 16px">
+                <div>
+                  <label>
+                    <i class="fas fa-circle" style="color: #16a34a"></i>
+                    Hijau (Rp)
+                  </label>
+                  <input type="number" id="priceHijau" value="50000" />
+                </div>
+                <div>
+                  <label>
+                    <i class="fas fa-circle" style="color: #eab308"></i>
+                    Kuning (Rp)
+                  </label>
+                  <input type="number" id="priceKuning" value="75000" />
+                </div>
+              </div>
+              <div class="form-row" style="margin-top: 16px">
+                <div>
+                  <label>
+                    <i class="fas fa-circle" style="color: #dc2626"></i>
+                    Merah (Rp)
+                  </label>
+                  <input type="number" id="priceMerah" value="100000" />
+                </div>
+                <div>
+                  <label>
+                    <i class="fas fa-circle" style="color: #6b7280"></i>
+                    Putih (Rp)
+                  </label>
+                  <input type="number" id="pricePutih" value="25000" />
+                </div>
+              </div>
+              <div style="margin-top: 16px">
+                <label>
+                  <i class="fas fa-circle" style="color: #8b5cf6"></i>
+                  Warga (Rp)
+                </label>
+                <input type="number" id="priceWarga" value="15000" />
+              </div>
+              <div style="margin-top: 16px">
+                <button class="btn btn-primary" id="savePrices">
+                  <i class="fas fa-save"></i>
+                  Simpan Harga
+                </button>
+              </div>
+            </div>
+
+            <div class="card full">
+              <h3>
+                <i class="fas fa-images"></i>
+                Informasi
+              </h3>
+              <div class="slideshow card" id="slideshow">
+                <div class="slides" id="slides">
+                  <div
+                    class="slide"
+                    style="
+                      background: linear-gradient(135deg, #0b5ed7, #60a5fa);
+                    "
+                  >
+                    <h3>
+                      Selamat datang di Sistem Administrasi Pagar Nusa Bumi
+                      Panjalu
+                    </h3>
+                    <p>
+                      Kelola pendaftaran, anggota, pembayaran, dan nota dengan
+                      cepat dan efisien.
+                    </p>
+                  </div>
+                  <div
+                    class="slide"
+                    style="
+                      background: linear-gradient(135deg, #0ea5a3, #34d399);
+                    "
+                  >
+                    <h3>Form Pendaftaran Terhubung</h3>
+                    <p>
+                      Pilihan: Kabupaten/Kota → Kecamatan → Desa (cascading)
+                      untuk kemudahan input data.
+                    </p>
+                  </div>
+                  <div
+                    class="slide"
+                    style="
+                      background: linear-gradient(135deg, #f97316, #fb923c);
+                    "
+                  >
+                    <h3>Nota & Tanda Tangan Digital</h3>
+                    <p>
+                      Buat bukti pembayaran bergaya bank profesional dan unduh
+                      dalam format PDF.
+                    </p>
+                  </div>
+                </div>
+                <div class="slideshow-indicators" id="indicators"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Pendaftaran -->
+        <section id="pendaftaran" class="view" style="display: none">
+          <div class="card">
+            <h3>
+              <i class="fas fa-user-plus"></i>
+              Form Pendaftaran
+            </h3>
+            <form id="formPendaftaran">
+              <div class="grid">
+                <div>
+                  <label>
+                    <i class="fas fa-map-marker-alt"></i>
+                    Kabupaten / Kota
+                  </label>
+                  <select id="selKabupaten"></select>
+                </div>
+                <div>
+                  <label>
+                    <i class="fas fa-map"></i>
+                    Kecamatan
+                  </label>
+                  <select id="selKecamatan"></select>
+                </div>
+                <div>
+                  <label>
+                    <i class="fas fa-home"></i>
+                    Desa
+                  </label>
+                  <select id="selDesa"></select>
+                </div>
+
+                <div>
+                  <label>
+                    <i class="fas fa-user"></i>
+                    Nama Pengurus
+                  </label>
+                  <input id="namaPengurus" required />
+                </div>
+                <div>
+                  <label>
+                    <i class="fas fa-phone"></i>
+                    No WA
+                  </label>
+                  <input id="noWA" placeholder="08..." required />
+                </div>
+
+                <div>
+                  <label>
+                    <i class="fas fa-circle" style="color: #16a34a"></i>
+                    Jumlah ikut Hijau
+                  </label>
+                  <input type="number" id="jmlHijau" value="0" min="0" />
+                </div>
+                <div>
+                  <label>
+                    <i class="fas fa-circle" style="color: #eab308"></i>
+                    Jumlah ikut Kuning
+                  </label>
+                  <input type="number" id="jmlKuning" value="0" min="0" />
+                </div>
+                <div>
+                  <label>
+                    <i class="fas fa-circle" style="color: #dc2626"></i>
+                    Jumlah ikut Merah
+                  </label>
+                  <input type="number" id="jmlMerah" value="0" min="0" />
+                </div>
+                <div>
+                  <label>
+                    <i class="fas fa-circle" style="color: #6b7280"></i>
+                    Jumlah ikut Putih
+                  </label>
+                  <input type="number" id="jmlPutih" value="0" min="0" />
+                </div>
+                <div>
+                  <label>
+                    <i class="fas fa-circle" style="color: #8b5cf6"></i>
+                    Jumlah Warga
+                  </label>
+                  <input type="number" id="jmlWarga" value="0" min="0" />
+                </div>
+
+                <div>
+                  <label>
+                    <i class="fas fa-credit-card"></i>
+                    Status Pembayaran
+                  </label>
+                  <select id="statusBayar">
+                    <option value="lunas">Lunas</option>
+                    <option value="belum">Belum</option>
+                    <option value="menyusul">Menyusul</option>
+                  </select>
+                </div>
+                <div>
+                  <label>
+                    <i class="fas fa-money-bill-wave"></i>
+                    Nominal Pembayaran (Rp) — opsional
+                  </label>
+                  <input
+                    type="number"
+                    id="nominalPembayaran"
+                    value="0"
+                    min="0"
+                  />
+                </div>
+
+                <div class="full">
+                  <label>
+                    <i class="fas fa-sticky-note"></i>
+                    Keterangan (opsional)
+                  </label>
+                  <textarea id="keterangan" rows="3"></textarea>
+                </div>
+
+                <div class="full">
+                  <div class="flex">
+                    <button class="btn btn-primary" type="submit">
+                      <i class="fas fa-save"></i>
+                      Simpan Pendaftaran
+                    </button>
+                    <button class="btn btn-ghost" type="button" id="clearForm">
+                      <i class="fas fa-redo"></i>
+                      Reset
+                    </button>
+                    <div style="margin-left: auto" class="muted">
+                      <i class="fas fa-info-circle"></i>
+                      Total otomatis akan muncul saat menyimpan
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <!-- Data Anggota -->
+        <section id="data-anggota" class="view" style="display: none">
+          <div class="card">
+            <h3>
+              <i class="fas fa-users"></i>
+              Data Anggota (hasil pendaftaran)
+            </h3>
+            <div style="margin-bottom: 16px" class="flex">
+              <div style="position: relative; width: 320px">
+                <i
+                  class="fas fa-search"
+                  style="
+                    position: absolute;
+                    left: 12px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    color: var(--muted);
+                  "
+                ></i>
+                <input
+                  id="search"
+                  placeholder="Cari nama / kabupaten / pengurus..."
+                  style="
+                    padding: 8px 12px 8px 36px;
+                    border-radius: 8px;
+                    border: 1px solid #e6edf7;
+                    width: 100%;
+                  "
+                />
+              </div>
+              <button class="btn btn-ghost" id="refreshTable">
+                <i class="fas fa-sync-alt"></i>
+                Refresh
+              </button>
+            </div>
+            <div class="table-container">
+              <table id="tableAnggota">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Pengurus</th>
+                    <th>WA</th>
+                    <th>Lokasi</th>
+                    <th>Hijau</th>
+                    <th>Kuning</th>
+                    <th>Merah</th>
+                    <th>Putih</th>
+                    <th>Warga</th>
+                    <th>Status</th>
+                    <th>Total(Rp)</th>
+                    <th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- Data Peserta -->
+        <section id="data-peserta" class="view" style="display: none">
+          <div class="card">
+            <h3>
+              <i class="fas fa-chart-pie"></i>
+              Statistik Peserta
+            </h3>
+            <div class="grid-4">
+              <div class="participant-card">
+                <div class="participant-icon green">
+                  <i class="fas fa-users"></i>
+                </div>
+                <div class="participant-count" id="totalHijau">0</div>
+                <div class="participant-label">Peserta Hijau</div>
+                <div class="participant-desc">Total peserta kategori hijau</div>
+              </div>
+              <div class="participant-card">
+                <div class="participant-icon yellow">
+                  <i class="fas fa-users"></i>
+                </div>
+                <div class="participant-count" id="totalKuning">0</div>
+                <div class="participant-label">Peserta Kuning</div>
+                <div class="participant-desc">
+                  Total peserta kategori kuning
+                </div>
+              </div>
+              <div class="participant-card">
+                <div class="participant-icon red">
+                  <i class="fas fa-users"></i>
+                </div>
+                <div class="participant-count" id="totalMerah">0</div>
+                <div class="participant-label">Peserta Merah</div>
+                <div class="participant-desc">Total peserta kategori merah</div>
+              </div>
+              <div class="participant-card">
+                <div class="participant-icon white">
+                  <i class="fas fa-users"></i>
+                </div>
+                <div class="participant-count" id="totalPutih">0</div>
+                <div class="participant-label">Peserta Putih</div>
+                <div class="participant-desc">Total peserta kategori putih</div>
+              </div>
+            </div>
+            <div class="grid-4">
+              <div class="participant-card">
+                <div class="participant-icon purple">
+                  <i class="fas fa-users"></i>
+                </div>
+                <div class="participant-count" id="totalWarga">0</div>
+                <div class="participant-label">Peserta Warga</div>
+                <div class="participant-desc">Total peserta kategori warga</div>
+              </div>
+              <div class="participant-card">
+                <div
+                  class="participant-icon"
+                  style="background: linear-gradient(135deg, #0b5ed7, #0640a0)"
+                >
+                  <i class="fas fa-users"></i>
+                </div>
+                <div class="participant-count" id="totalAll">0</div>
+                <div class="participant-label">Total Semua Peserta</div>
+                <div class="participant-desc">Total semua kategori peserta</div>
+              </div>
+              <div class="participant-card">
+                <div
+                  class="participant-icon"
+                  style="background: linear-gradient(135deg, #f59e0b, #d97706)"
+                >
+                  <i class="fas fa-chart-pie"></i>
+                </div>
+                <div class="participant-count" id="totalCategories">5</div>
+                <div class="participant-label">Total Kategori</div>
+                <div class="participant-desc">Jumlah kategori peserta</div>
+              </div>
+              <div class="participant-card">
+                <div
+                  class="participant-icon"
+                  style="background: linear-gradient(135deg, #16a34a, #15803d)"
+                >
+                  <i class="fas fa-user-check"></i>
+                </div>
+                <div class="participant-count" id="totalPendaftar">0</div>
+                <div class="participant-label">Total Pendaftar</div>
+                <div class="participant-desc">Jumlah pendaftar aktif</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card full" style="margin-top: 20px">
+            <h3>
+              <i class="fas fa-chart-bar"></i>
+              Grafik Distribusi Peserta
+            </h3>
+            <div class="chart-container">
+              <canvas id="participantChart"></canvas>
+            </div>
+          </div>
+
+          <div class="card full" style="margin-top: 20px">
+            <h3>
+              <i class="fas fa-table"></i>
+              Tabel Detail Peserta
+            </h3>
+            <div style="margin-bottom: 16px" class="flex">
+              <div style="position: relative; width: 320px">
+                <i
+                  class="fas fa-search"
+                  style="
+                    position: absolute;
+                    left: 12px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    color: var(--muted);
+                  "
+                ></i>
+                <input
+                  id="searchPeserta"
+                  placeholder="Cari nama pengurus..."
+                  style="
+                    padding: 8px 12px 8px 36px;
+                    border-radius: 8px;
+                    border: 1px solid #e6edf7;
+                    width: 100%;
+                  "
+                />
+              </div>
+              <button class="btn btn-ghost" id="refreshPesertaTable">
+                <i class="fas fa-sync-alt"></i>
+                Refresh
+              </button>
+            </div>
+            <div class="table-container">
+              <table id="tablePeserta">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Pengurus</th>
+                    <th>WA</th>
+                    <th>Lokasi</th>
+                    <th>Hijau</th>
+                    <th>Kuning</th>
+                    <th>Merah</th>
+                    <th>Putih</th>
+                    <th>Warga</th>
+                    <th>Total Peserta</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- Pembayaran -->
+        <section id="pembayaran" class="view" style="display: none">
+          <div class="card">
+            <h3>
+              <i class="fas fa-credit-card"></i>
+              Administrasi Pembayaran
+            </h3>
+            <div class="grid">
+              <div class="card">
+                <label>
+                  <i class="fas fa-user-check"></i>
+                  Pilih Pendaftar
+                </label>
+                <select id="selectPendaftar"></select>
+                <div style="margin-top: 16px">
+                  <i class="fas fa-tags"></i>
+                  Harga per-kategori (terkunci dari dashboard):
+                </div>
+                <div class="form-row" style="margin-top: 12px">
+                  <div>
+                    <label>
+                      <i class="fas fa-circle" style="color: #16a34a"></i>
+                      Hijau
+                    </label>
+                    <input
+                      id="p_hijau"
+                      placeholder="Hijau"
+                      type="number"
+                      disabled
+                    />
+                  </div>
+                  <div>
+                    <label>
+                      <i class="fas fa-circle" style="color: #eab308"></i>
+                      Kuning
+                    </label>
+                    <input
+                      id="p_kuning"
+                      placeholder="Kuning"
+                      type="number"
+                      disabled
+                    />
+                  </div>
+                </div>
+                <div class="form-row" style="margin-top: 12px">
+                  <div>
+                    <label>
+                      <i class="fas fa-circle" style="color: #dc2626"></i>
+                      Merah
+                    </label>
+                    <input
+                      id="p_merah"
+                      placeholder="Merah"
+                      type="number"
+                      disabled
+                    />
+                  </div>
+                  <div>
+                    <label>
+                      <i class="fas fa-circle" style="color: #6b7280"></i>
+                      Putih
+                    </label>
+                    <input
+                      id="p_putih"
+                      placeholder="Putih"
+                      type="number"
+                      disabled
+                    />
+                  </div>
+                </div>
+                <div style="margin-top: 12px">
+                  <label>
+                    <i class="fas fa-circle" style="color: #8b5cf6"></i>
+                    Warga
+                  </label>
+                  <input
+                    id="p_warga"
+                    placeholder="Warga"
+                    type="number"
+                    disabled
+                  />
+                </div>
+
+                <div class="payment-highlight">
+                  <h4 style="margin-top: 0; margin-bottom: 12px">
+                    <i class="fas fa-calculator"></i>
+                    Detail Pembayaran
+                  </h4>
+                  <div class="payment-row">
+                    <span>Total Tagihan:</span>
+                    <span id="totalTagihan">Rp 0</span>
+                  </div>
+                  <div class="payment-row">
+                    <span>Nominal Dibayarkan:</span>
+                    <input
+                      type="number"
+                      id="nominalDibayarkan"
+                      value="0"
+                      min="0"
+                      style="width: 150px; text-align: right"
+                    />
+                  </div>
+                  <div class="payment-row total">
+                    <span>Sisa Kekurangan:</span>
+                    <span id="sisaKekurangan">Rp 0</span>
+                  </div>
+                </div>
+
+                <div style="margin-top: 16px" class="flex">
+                  <button class="btn btn-primary" id="applyPayment">
+                    <i class="fas fa-calculator"></i>
+                    Hitung & Simpan
+                  </button>
+                  <button class="btn btn-ghost" id="resetPembayaran">
+                    <i class="fas fa-redo"></i>
+                    Reset
+                  </button>
+                </div>
+              </div>
+
+              <div class="card">
+                <h4>
+                  <i class="fas fa-file-invoice-dollar"></i>
+                  Ringkasan Pembayaran
+                </h4>
+                <div id="ringkasanPembayaran">Tidak ada pendaftar terpilih</div>
+                <div style="margin-top: 10px" class="flex">
+                  <button class="btn btn-primary" id="buatNota">
+                    <i class="fas fa-file-invoice"></i>
+                    Buat Nota & Cetak
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Nota -->
+        <section id="nota" class="view" style="display: none">
+          <div class="card">
+            <h3>
+              <i class="fas fa-file-invoice"></i>
+              Daftar Nota
+            </h3>
+            <div style="margin-bottom: 16px" class="flex">
+              <div style="position: relative; width: 320px">
+                <i
+                  class="fas fa-search"
+                  style="
+                    position: absolute;
+                    left: 12px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    color: var(--muted);
+                  "
+                ></i>
+                <input
+                  id="searchNota"
+                  placeholder="Cari nama atau ID nota..."
+                  style="
+                    padding: 8px 12px 8px 36px;
+                    border-radius: 8px;
+                    border: 1px solid #e6edf7;
+                    width: 100%;
+                  "
+                />
+              </div>
+              <button class="btn btn-primary" id="printSelected">
+                <i class="fas fa-print"></i>
+                Cetak Nota Terpilih
+              </button>
+            </div>
+            <div id="notaList" class="nota-list">
+              <!-- Nota cards will be generated here -->
+            </div>
+          </div>
+        </section>
+
+        <!-- Pengaturan -->
+        <section id="pengaturan" class="view" style="display: none">
+          <div class="card">
+            <h3>
+              <i class="fas fa-cog"></i>
+              Pengaturan Lanjutan
+            </h3>
+            <div class="muted">
+              <i class="fas fa-info-circle"></i>
+              Semua data disimpan di cloud database. Data akan tersedia untuk
+              semua pengguna yang mengakses aplikasi ini.
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- Password Modal for Data Anggota -->
+    <div id="dataAnggotaPasswordModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>
+            <i class="fas fa-lock"></i>
+            Verifikasi Akses Data Anggota
+          </h3>
+        </div>
+        <div class="modal-body">
+          <p>
+            Menu Data Anggota dilindungi. Masukkan password untuk melanjutkan:
+          </p>
+          <input
+            type="password"
+            id="dataAnggotaPasswordInput"
+            placeholder="Masukkan password akses"
+            style="width: 100%; margin-top: 10px"
+          />
+          <div
+            class="password-strength"
+            id="passwordStrength"
+            style="display: none"
+          >
+            <div class="password-strength-bar" id="passwordStrengthBar"></div>
+          </div>
+          <p style="margin-top: 10px; font-size: 12px; color: var(--muted)">
+            <i class="fas fa-info-circle"></i>
+            Hubungi administrator untuk mendapatkan password akses.
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-ghost" id="cancelDataAnggotaPassword">
+            Batal
+          </button>
+          <button class="btn btn-primary" id="confirmDataAnggotaPassword">
+            <i class="fas fa-check"></i>
+            Verifikasi
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Password Modal for Price Settings -->
+    <div id="passwordModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>
+            <i class="fas fa-lock"></i>
+            Konfirmasi Password
+          </h3>
+        </div>
+        <div class="modal-body">
+          <p>masukkan password untuk mengubah harga:</p>
+          <input
+            type="password"
+            id="passwordInput"
+            placeholder="Masukkan password"
+            style="width: 100%; margin-top: 10px"
+          />
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-ghost" id="cancelPassword">Batal</button>
+          <button class="btn btn-primary" id="confirmPassword">
+            <i class="fas fa-check"></i>
+            Konfirmasi
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Signature modal using canvas (inline) -->
+    <div
+      id="sigModal"
+      style="
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+      "
+    >
+      <div
+        style="
+          background: #fff;
+          padding: 24px;
+          border-radius: var(--radius);
+          max-width: 600px;
+          margin: auto;
+          box-shadow: var(--shadow-lg);
+        "
+      >
+        <h3>
+          <i class="fas fa-signature"></i>
+          Tanda Tangan Digital
+        </h3>
+        <canvas
+          id="sigCanvas"
+          width="560"
+          height="200"
+          style="border: 1px solid #eee; border-radius: 8px; margin-top: 16px"
+        ></canvas>
+        <div class="flex" style="margin-top: 16px">
+          <button class="btn btn-primary" id="saveSig">
+            <i class="fas fa-save"></i>
+            Simpan TTD
+          </button>
+          <button class="btn btn-ghost" id="clearSig">
+            <i class="fas fa-eraser"></i>
+            Bersihkan
+          </button>
+          <button class="btn btn-ghost" id="closeSig">
+            <i class="fas fa-times"></i>
+            Tutup
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification"></div>
+
+    <!-- libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+      // Firebase Configuration
+      // Ganti dengan konfigurasi Firebase Anda
+      const firebaseConfig = {
+        apiKey: "AIzaSyA1sT3z3VqYcZ8qXjYpZkL7mN6oP5rQ4tW",
+        authDomain: "pagarnusa-panjalu.firebaseapp.com",
+        databaseURL: "https://pagarnusa-panjalu-default-rtdb.firebaseio.com",
+        projectId: "pagarnusa-panjalu",
+        storageBucket: "pagarnusa-panjalu.appspot.com",
+        messagingSenderId: "123456789012",
+        appId: "1:123456789012:web:abcdef1234567890",
+      };
+
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+      const database = firebase.database();
+      const dbRef = database.ref("pagar_nusa_data");
+
+      // Connection status
+      const connectionStatus = document.getElementById("connectionStatus");
+      const connectionText = document.getElementById("connectionText");
+
+      function updateConnectionStatus(status) {
+        connectionStatus.className = `connection-status ${status}`;
+        switch (status) {
+          case "online":
+            connectionText.textContent = "Terhubung ke server";
+            break;
+          case "offline":
+            connectionText.textContent = "Tidak ada koneksi";
+            break;
+          case "syncing":
+            connectionText.textContent = "Menyinkronkan data...";
+            break;
+        }
+      }
+
+      // Listen for connection status
+      firebase
+        .database()
+        .ref(".info/connected")
+        .on("value", (snapshot) => {
+          if (snapshot.val() === true) {
+            updateConnectionStatus("online");
+          } else {
+            updateConnectionStatus("offline");
+          }
+        });
+
+      // Splash Screen Handler
+      window.addEventListener("load", () => {
+        // Set timeout untuk menyembunyikan splash screen dan menampilkan aplikasi
+        setTimeout(() => {
+          const splashScreen = document.getElementById("splashScreen");
+          const app = document.getElementById("app");
+
+          // Hide splash screen
+          splashScreen.classList.add("hidden");
+
+          // Show main app
+          setTimeout(() => {
+            app.classList.add("visible");
+          }, 500);
+        }, 3000); // 3 detik
+      });
+
+      /******************* DATA SAMPLE untuk cascading lokasi *******************/
+      const lokasiData = {
+        "Kabupaten Kediri": {
+          Pare: [
+            "bendo",
+            "darungan",
+            "gedangsewu",
+            "pelem",
+            "sambirejo",
+            "sidorejo",
+            "sumberbendo",
+            "tertek",
+            "tulungrejo",
+          ],
+          Plosoklaten: [
+            "brenggolo",
+            "donganti",
+            "jarak",
+            "kawedusan",
+            "kayunan",
+            "klanderan",
+            "panjer",
+            "plosokidul",
+            "plosolor",
+            "pranggang",
+            "punjul",
+            "sepawon",
+            "sumberagung",
+            "wonorejo trisulo",
+          ],
+          Kandat: ["cendono", "ringinsari", "tegalan", "ngletih", "sumberejo"],
+          KayenKidul: [
+            "baye",
+            "pandangan",
+            "nanggungan",
+            "semambung",
+            "kayen kidul",
+            "mukuh",
+          ],
+          Ngasem: [
+            "tugurejo",
+            "sumberejo",
+            "gogorante",
+            "doko",
+            "ngasem",
+            "sukorejo",
+            "butuh",
+            "tengger",
+            "ngantru",
+            "sambong",
+            "dukohkidul",
+          ],
+          Badas: [
+            "Badas",
+            "canggu",
+            "lamong",
+            "bringin",
+            "sekoto",
+            "tunglur",
+            "krecek",
+            "blaru",
+          ],
+          Grogol: [
+            "Grogol",
+            "kalipang",
+            "cerme",
+            "wonosari",
+            "sonorejo",
+            "datengan",
+            "sumberejo",
+            "gamyok",
+            "bakalan",
+          ],
+          Kandangan: [
+            "kemiri",
+            "klampisan",
+            "karangtengah",
+            "kasreman",
+            "jerukwangi",
+            "jerukgulung",
+            "jlumbang",
+            "bukur",
+            "kandangan",
+            "banaran",
+            "mlancu",
+            "medowo",
+          ],
+          Mojoroto: [
+            "Mojoroto",
+            "bandar lor",
+            "bandar kidul",
+            "banjar mlati",
+            "pojok",
+            "sukorame",
+            "bujel",
+            "gayam",
+            "mrican",
+            "dermo",
+            "ngampel",
+            "mojoroto",
+            "campurejo",
+            "lirboyo",
+            "tamanan",
+          ],
+          Pesantren: [
+            "Pesantren",
+            "banaran",
+            "bangsal",
+            "betet",
+            "bawang",
+            "blabak",
+            "burengan",
+            "jamsaren",
+            "ketami",
+            "ngletih",
+            "pakunden",
+            "singonegaran",
+            "tempurejo",
+            "tinalan",
+            "tosaren",
+          ],
+          Plemahan: [
+            "Plemahan",
+            "lengenharjo",
+            "togowangi",
+            "mujono",
+            "bogo kidul",
+            "kayen lor",
+            "wonokerto",
+            "ngino",
+            "sebet",
+            "sukoharjo",
+            "mojo kerep",
+            "bogo kidul",
+            "sidomulyo",
+            "banjar rejo",
+            "payaman",
+            "ringen rejo",
+          ],
+          Puncu: [
+            "Puncu",
+            "asmorobangun",
+            "manggis",
+            "gadungan",
+            "sidpmulyo",
+            "watu gede",
+            "wonorejo",
+            "sidokerto",
+          ],
+          Ringinrejo: [
+            "Ringinrejo",
+            "batuaji",
+            "dawung",
+            "deyeng",
+            "nambakan",
+            "purwodadi",
+            "sambi",
+            "selodono",
+            "srikaton",
+            "susuhbango",
+            "jemekan",
+          ],
+          Semen: ["Semen", "bulu", "bobang", "titik", "kedak"],
+          Tarokan: [
+            "Tarokan",
+            "blimbing",
+            "bulusari",
+            "cengkok",
+            "jati",
+            "kaliboto",
+            "kalirong",
+            "kedungsari",
+            "kerep",
+            "kerep",
+            "sumberduren",
+            "tarokan",
+          ],
+          Wates: [
+            "duwet",
+            "tawang",
+            "segaran",
+            "Tumpukgadungan",
+            "pojok",
+            "wonorejo",
+            "wates",
+            "jajar",
+            "tunge",
+            "tempurejo",
+            "plaosan",
+            "karanganyar",
+            "sumberagung",
+            "pagu",
+            "joho",
+            "silir",
+            "janti",
+            "sidomulyo",
+          ],
+          Ngancar: ["Ngancar", "sempu", "kunjang", "manggis", "sugihwaras"],
+          Purwoasri: [
+            "Purwoasri",
+            "dayu",
+            "dawuhan",
+            "jantok",
+            "kempleng",
+            "muneng",
+            "pandansari",
+            "pesing",
+            "sumberejo",
+          ],
+          Papar: [
+            "babad",
+            "klanderan",
+            "kedungfong",
+            "kedungrejo",
+            "kwaron",
+            "manggis",
+            "mekikis",
+            "minggiran",
+            "ngampel",
+            "panjaran",
+            "papar",
+            "pehkulon",
+            "pehwetan",
+            "purwotengah",
+            "sendangrejo",
+          ],
+        },
+        "Kota Kediri": {
+          Mojoroto: [
+            "bandar lor",
+            "bujel",
+            "gayam",
+            "mrican",
+            "dermo",
+            "bandar kidul",
+            "banjarmlati",
+            "campurejo",
+            "ngampel",
+            "pojok",
+            "pojok",
+            "sukorame",
+            "tamanan",
+          ],
+          Pesantren: [
+            "Pesantren",
+            "banaran",
+            "bangsal",
+            "betet",
+            "bawang",
+            "blabak",
+            "burengan",
+            "jamsaren",
+            "ketami",
+            "ngletih",
+            "pakunden",
+            "singonegaran",
+            "tempurejo",
+            "tinalan",
+            "tosaren",
+          ],
+          kedirikota: [
+            "bolowerti",
+            "banjaran",
+            "dandangan",
+            "jagalan",
+            "kaliombo",
+            "kampungdalem",
+            "kemasan",
+            "manisrenggo",
+            "ngadirejo",
+            "ngronggo",
+            "pakelan",
+            "pocanan",
+            "rejomulyo",
+            "ringinanom",
+            "semampir",
+            "setonogedong",
+            "setonopande",
+          ],
+        },
+      };
+
+      // Passwords for security
+      const ADMIN_PASSWORD = "admin1986";
+      const DATA_ANGGOTA_PASSWORD = "admin1986";
+      let selectedNotaId = null;
+      let participantChart = null; // Chart.js instance
+      let dataAnggotaAccessGranted = false; // Track access to Data Anggota
+
+      // util: currency format
+      const formatRupiah = (val) => {
+        const n = Number(val) || 0;
+        return n.toLocaleString("id-ID");
+      };
+
+      // app state (now loaded from Firebase)
+      let state = {
+        prices: {
+          hijau: 50000,
+          kuning: 75000,
+          merah: 100000,
+          putih: 25000,
+          warga: 15000,
+        },
+        pendaftar: [],
+      };
+
+      // Save state to Firebase
+      function saveState() {
+        updateConnectionStatus("syncing");
+        dbRef
+          .set(state)
+          .then(() => {
+            updateConnectionStatus("online");
+            showNotification("Data berhasil disimpan ke server", "success");
+          })
+          .catch((error) => {
+            updateConnectionStatus("offline");
+            showNotification("Gagal menyimpan data: " + error.message, "error");
+          });
+      }
+
+      // Load state from Firebase and set up real-time listener
+      function loadState() {
+        updateConnectionStatus("syncing");
+        dbRef.on(
+          "value",
+          (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+              state = data;
+            } else {
+              // Initialize with default values if no data exists
+              saveState();
+            }
+
+            renderSummary();
+            updateParticipantStats();
+            renderTable();
+            updateConnectionStatus("online");
+          },
+          (error) => {
+            updateConnectionStatus("offline");
+            showNotification("Gagal memuat data: " + error.message, "error");
+          }
+        );
+      }
+
+      // Show notification
+      function showNotification(message, type = "success") {
+        const notification = document.getElementById("notification");
+        notification.textContent = message;
+        notification.className = `notification ${type}`;
+        notification.style.display = "block";
+
+        setTimeout(() => {
+          notification.style.display = "none";
+        }, 3000);
+      }
+
+      /******************* INIT UI *******************/
+      // sidebar navigation
+      document.querySelectorAll(".nav button").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          const viewName = btn.dataset.view;
+
+          // Check if trying to access Data Anggota without password
+          if (viewName === "data-anggota" && !dataAnggotaAccessGranted) {
+            showDataAnggotaPasswordModal();
+            return;
+          }
+
+          document
+            .querySelectorAll(".nav button")
+            .forEach((b) => b.classList.remove("active"));
+          btn.classList.add("active");
+          showView(viewName);
+
+          // Close mobile menu after navigation
+          if (window.innerWidth <= 768) {
+            closeMobileMenu();
+          }
+        });
+      });
+
+      // Function to show Data Anggota password modal
+      function showDataAnggotaPasswordModal() {
+        const modal = document.getElementById("dataAnggotaPasswordModal");
+        const input = document.getElementById("dataAnggotaPasswordInput");
+        modal.style.display = "flex";
+        input.value = "";
+        input.focus();
+
+        // Clear previous strength indicator
+        document.getElementById("passwordStrength").style.display = "none";
+      }
+
+      // Data Anggota password modal handlers
+      document
+        .getElementById("confirmDataAnggotaPassword")
+        .addEventListener("click", () => {
+          const input = document.getElementById("dataAnggotaPasswordInput");
+          const password = input.value;
+
+          if (password === DATA_ANGGOTA_PASSWORD) {
+            dataAnggotaAccessGranted = true;
+            document.getElementById("dataAnggotaPasswordModal").style.display =
+              "none";
+            showNotification("Akses Data Anggota diizinkan", "success");
+
+            // Navigate to Data Anggota
+            document
+              .querySelectorAll(".nav button")
+              .forEach((b) => b.classList.remove("active"));
+            document
+              .querySelector('[data-view="data-anggota"]')
+              .classList.add("active");
+            showView("data-anggota");
+          } else {
+            showNotification("Password salah! Akses ditolak.", "error");
+            input.select();
+            input.classList.add("shake");
+            setTimeout(() => input.classList.remove("shake"), 500);
+          }
+        });
+
+      document
+        .getElementById("cancelDataAnggotaPassword")
+        .addEventListener("click", () => {
+          document.getElementById("dataAnggotaPasswordModal").style.display =
+            "none";
+        });
+
+      // Password strength indicator
+      document
+        .getElementById("dataAnggotaPasswordInput")
+        .addEventListener("input", (e) => {
+          const password = e.target.value;
+          const strengthDiv = document.getElementById("passwordStrength");
+          const strengthBar = document.getElementById("passwordStrengthBar");
+
+          if (password.length > 0) {
+            strengthDiv.style.display = "block";
+
+            if (password.length < 6) {
+              strengthBar.className = "password-strength-bar weak";
+            } else if (password.length < 10) {
+              strengthBar.className = "password-strength-bar medium";
+            } else {
+              strengthBar.className = "password-strength-bar strong";
+            }
+          } else {
+            strengthDiv.style.display = "none";
+          }
+        });
+
+      // Handle Enter key in Data Anggota password input
+      document
+        .getElementById("dataAnggotaPasswordInput")
+        .addEventListener("keypress", (e) => {
+          if (e.key === "Enter") {
+            document.getElementById("confirmDataAnggotaPassword").click();
+          }
+        });
+
+      // Mobile menu functionality
+      const mobileMenuToggle = document.getElementById("mobileMenuToggle");
+      const mobileMenuOverlay = document.getElementById("mobileMenuOverlay");
+      const mobileSidebar = document.getElementById("mobileSidebar");
+      const mobileCloseBtn = document.getElementById("mobileCloseBtn");
+
+      function openMobileMenu() {
+        mobileSidebar.classList.add("active");
+        mobileMenuOverlay.style.display = "block";
+        document.body.style.overflow = "hidden"; // Prevent body scroll when menu is open
+      }
+
+      function closeMobileMenu() {
+        mobileSidebar.classList.remove("active");
+        mobileMenuOverlay.style.display = "none";
+        document.body.style.overflow = ""; // Restore body scroll
+      }
+
+      mobileMenuToggle.addEventListener("click", openMobileMenu);
+      mobileCloseBtn.addEventListener("click", closeMobileMenu);
+      mobileMenuOverlay.addEventListener("click", closeMobileMenu);
+
+      // Sidebar toggle functionality
+      const sidebarToggle = document.getElementById("sidebarToggle");
+      const app = document.getElementById("app");
+
+      sidebarToggle.addEventListener("click", () => {
+        app.classList.toggle("sidebar-collapsed");
+
+        // Save sidebar state to localStorage
+        const isCollapsed = app.classList.contains("sidebar-collapsed");
+        localStorage.setItem("sidebarCollapsed", isCollapsed);
+      });
+
+      // Check localStorage for sidebar state on page load
+      const isSidebarCollapsed =
+        localStorage.getItem("sidebarCollapsed") === "true";
+      if (isSidebarCollapsed) {
+        app.classList.add("sidebar-collapsed");
+      }
+
+      function showView(name) {
+        document
+          .querySelectorAll(".view")
+          .forEach((v) => (v.style.display = "none"));
+        document.getElementById(name).style.display = "block";
+
+        const titleElement = document.getElementById("viewTitle");
+        const viewName = name.replace(/-/g, " ");
+
+        // Set appropriate icon based on view
+        let icon = "";
+        switch (name) {
+          case "dashboard":
+            icon = "fas fa-tachometer-alt";
+            break;
+          case "pendaftaran":
+            icon = "fas fa-user-plus";
+            break;
+          case "data-anggota":
+            icon = "fas fa-users";
+            break;
+          case "data-peserta":
+            icon = "fas fa-chart-pie";
+            break;
+          case "pembayaran":
+            icon = "fas fa-credit-card";
+            break;
+          case "nota":
+            icon = "fas fa-file-invoice";
+            break;
+          case "pengaturan":
+            icon = "fas fa-cog";
+            break;
+          default:
+            icon = "fas fa-folder";
+        }
+
+        titleElement.innerHTML = `<i class="${icon}"></i> ${
+          viewName.charAt(0).toUpperCase() + viewName.slice(1)
+        }`;
+
+        if (name === "data-anggota") renderTable();
+        if (name === "data-peserta") {
+          updateParticipantStats();
+          renderPesertaTable();
+          initParticipantChart();
+        }
+        if (name === "pembayaran") populatePendaftarSelect();
+        if (name === "nota") renderNotaList();
+      }
+
+      // slideshow auto with indicators
+      let slideIdx = 0;
+      const slides = document.getElementById("slides");
+      const indicatorsContainer = document.getElementById("indicators");
+
+      // Create indicators
+      function createIndicators() {
+        indicatorsContainer.innerHTML = "";
+        const count = slides.children.length;
+        for (let i = 0; i < count; i++) {
+          const indicator = document.createElement("div");
+          indicator.className = "indicator";
+          if (i === 0) indicator.classList.add("active");
+          indicator.addEventListener("click", () => {
+            slideIdx = i;
+            updateSlide();
+          });
+          indicatorsContainer.appendChild(indicator);
+        }
+      }
+
+      function updateSlide() {
+        const count = slides.children.length;
+        slideIdx = slideIdx % count;
+        slides.style.transform = `translateX(-${slideIdx * 100}%)`;
+
+        // Update indicators
+        document.querySelectorAll(".indicator").forEach((ind, i) => {
+          if (i === slideIdx) {
+            ind.classList.add("active");
+          } else {
+            ind.classList.remove("active");
+          }
+        });
+      }
+
+      // Auto-advance slideshow
+      setInterval(() => {
+        slideIdx = (slideIdx + 1) % slides.children.length;
+        updateSlide();
+      }, 5000);
+
+      // Initialize indicators
+      createIndicators();
+
+      /******************* cascading selects *******************/
+      const selKab = document.getElementById("selKabupaten");
+      const selKec = document.getElementById("selKecamatan");
+      const selDes = document.getElementById("selDesa");
+
+      function fillLokasi() {
+        selKab.innerHTML = "";
+        Object.keys(lokasiData).forEach((k) => {
+          const o = document.createElement("option");
+          o.value = k;
+          o.textContent = k;
+          selKab.appendChild(o);
+        });
+        fillKec();
+      }
+
+      function fillKec() {
+        const k = selKab.value;
+        selKec.innerHTML = "";
+        Object.keys(lokasiData[k] || {}).forEach((x) => {
+          const o = document.createElement("option");
+          o.value = x;
+          o.textContent = x;
+          selKec.appendChild(o);
+        });
+        fillDes();
+      }
+
+      function fillDes() {
+        const k = selKab.value;
+        const kc = selKec.value;
+        selDes.innerHTML = "";
+        (lokasiData[k]?.[kc] || []).forEach((d) => {
+          const o = document.createElement("option");
+          o.value = d;
+          o.textContent = d;
+          selDes.appendChild(o);
+        });
+      }
+
+      selKab.addEventListener("change", fillKec);
+      selKec.addEventListener("change", fillDes);
+
+      /******************* Pendaftaran handling *******************/
+      document
+        .getElementById("formPendaftaran")
+        .addEventListener("submit", (e) => {
+          e.preventDefault();
+
+          const hijau = Number(document.getElementById("jmlHijau").value) || 0;
+          const kuning =
+            Number(document.getElementById("jmlKuning").value) || 0;
+          const merah = Number(document.getElementById("jmlMerah").value) || 0;
+          const putih = Number(document.getElementById("jmlPutih").value) || 0;
+          const warga = Number(document.getElementById("jmlWarga").value) || 0;
+          const nominal =
+            Number(document.getElementById("nominalPembayaran").value) || 0;
+
+          const entry = {
+            id: "P-" + Date.now(),
+            kabupaten: selKab.value,
+            kecamatan: selKec.value,
+            desa: selDes.value,
+            pengurus: document.getElementById("namaPengurus").value,
+            wa: document.getElementById("noWA").value,
+            hijau: hijau,
+            kuning: kuning,
+            merah: merah,
+            putih: putih,
+            warga: warga,
+            status: document.getElementById("statusBayar").value,
+            nominal: nominal,
+            keterangan: document.getElementById("keterangan").value,
+            nota: null, // will store generated nota meta
+          };
+
+          // calculate total automatically using current prices
+          const p = state.prices;
+          const totalTagihan =
+            entry.hijau * p.hijau +
+            entry.kuning * p.kuning +
+            entry.merah * p.merah +
+            entry.putih * p.putih +
+            entry.warga * p.warga;
+
+          entry.totalTagihan = totalTagihan;
+          entry.total = totalTagihan + nominal;
+
+          // Auto-generate nota metadata for every entry
+          entry.nota = {
+            tanggal: new Date().toLocaleString("id-ID"),
+            prices: { ...state.prices },
+            nominalDibayarkan: nominal,
+            totalTagihan: totalTagihan,
+            sisaKekurangan: Math.max(0, totalTagihan - nominal),
+          };
+
+          // Auto-update status based on payment
+          if (nominal >= totalTagihan) {
+            entry.status = "lunas";
+          } else if (nominal > 0) {
+            entry.status = "menyusul";
+          } else {
+            entry.status = "belum";
+          }
+
+          state.pendaftar.push(entry);
+          saveState();
+
+          showNotification(
+            `Pendaftaran tersimpan. Total Tagihan: Rp ${formatRupiah(
+              totalTagihan
+            )}`,
+            "success"
+          );
+
+          document.getElementById("formPendaftaran").reset();
+          fillLokasi();
+        });
+
+      document.getElementById("clearForm").addEventListener("click", () => {
+        document.getElementById("formPendaftaran").reset();
+        fillLokasi();
+      });
+
+      /******************* Render Table Data Anggota *******************/
+      function renderTable() {
+        const tbody = document.querySelector("#tableAnggota tbody");
+        tbody.innerHTML = "";
+        const q = document.getElementById("search").value.toLowerCase();
+        state.pendaftar
+          .filter(
+            (x) =>
+              !q || (x.pengurus + x.kabupaten + x.wa).toLowerCase().includes(q)
+          )
+          .forEach((row, i) => {
+            const tr = document.createElement("tr");
+
+            // Status badge
+            let statusBadge = "";
+            if (row.status === "lunas") {
+              statusBadge = '<span class="badge badge-success">Lunas</span>';
+            } else if (row.status === "belum") {
+              statusBadge = '<span class="badge badge-danger">Belum</span>';
+            } else {
+              statusBadge = '<span class="badge badge-warning">Menyusul</span>';
+            }
+
+            tr.innerHTML = `<td>${row.id}</td><td>${row.pengurus}</td><td>${
+              row.wa
+            }</td><td>${row.kabupaten} / ${row.kecamatan} / ${
+              row.desa
+            }</td><td>${row.hijau}</td><td>${row.kuning}</td><td>${
+              row.merah
+            }</td><td>${row.putih}</td><td>${
+              row.warga
+            }</td><td>${statusBadge}</td><td>Rp ${formatRupiah(
+              row.total
+            )}</td><td>
+              <div class="action-buttons">
+                <button class="btn btn-primary" style="padding: 4px 8px;" onclick="generateAndPrintNota(${i})">
+                  <i class="fas fa-print"></i> Cetak
+                </button>
+                <button class="btn btn-ghost" style="padding: 4px 8px;" data-i="${i}" onclick="editEntry(${i})">
+                  <i class="fas fa-edit"></i>
+                </button> 
+                <button class="btn btn-danger" style="padding: 4px 8px;" onclick="deleteEntry(${i})">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </td>`;
+            tbody.appendChild(tr);
+          });
+      }
+
+      // Function to generate and print nota directly from table
+      window.generateAndPrintNota = function (i) {
+        const p = state.pendaftar[i];
+        if (p) {
+          generateNota(p);
+          setTimeout(() => {
+            downloadReceiptPDF();
+          }, 500);
+        }
+      };
+
+      window.editEntry = function (i) {
+        const e = state.pendaftar[i];
+        if (!e) return showNotification("Tidak ditemukan", "error");
+
+        // prefill form for quick edit
+        showView("pendaftaran");
+        selKab.value = e.kabupaten;
+        fillKec();
+        selKec.value = e.kecamatan;
+        fillDes();
+        selDes.value = e.desa;
+        document.getElementById("namaPengurus").value = e.pengurus;
+        document.getElementById("noWA").value = e.wa;
+        document.getElementById("jmlHijau").value = e.hijau;
+        document.getElementById("jmlKuning").value = e.kuning;
+        document.getElementById("jmlMerah").value = e.merah;
+        document.getElementById("jmlPutih").value = e.putih;
+        document.getElementById("jmlWarga").value = e.warga;
+        document.getElementById("statusBayar").value = e.status;
+        document.getElementById("nominalPembayaran").value = e.nominal;
+        document.getElementById("keterangan").value = e.keterangan;
+
+        // remove original entry
+        state.pendaftar.splice(i, 1);
+        saveState();
+      };
+
+      window.deleteEntry = function (i) {
+        if (!confirm("Hapus pendaftar ini?")) return;
+        state.pendaftar.splice(i, 1);
+        saveState();
+        renderTable();
+        showNotification("Data berhasil dihapus", "success");
+      };
+
+      document.getElementById("search").addEventListener("input", renderTable);
+      document
+        .getElementById("refreshTable")
+        .addEventListener("click", renderTable);
+
+      /******************* Participant Statistics *******************/
+      function updateParticipantStats() {
+        // Calculate totals for each category
+        let totalHijau = 0;
+        let totalKuning = 0;
+        let totalMerah = 0;
+        let totalPutih = 0;
+        let totalWarga = 0;
+
+        state.pendaftar.forEach((p) => {
+          totalHijau += p.hijau;
+          totalKuning += p.kuning;
+          totalMerah += p.merah;
+          totalPutih += p.putih;
+          totalWarga += p.warga;
+        });
+
+        const totalAll =
+          totalHijau + totalKuning + totalMerah + totalPutih + totalWarga;
+
+        // Update the display
+        document.getElementById("totalHijau").textContent = totalHijau;
+        document.getElementById("totalKuning").textContent = totalKuning;
+        document.getElementById("totalMerah").textContent = totalMerah;
+        document.getElementById("totalPutih").textContent = totalPutih;
+        document.getElementById("totalWarga").textContent = totalWarga;
+        document.getElementById("totalAll").textContent = totalAll;
+        document.getElementById("totalPendaftar").textContent =
+          state.pendaftar.length;
+      }
+
+      function renderPesertaTable() {
+        const tbody = document.querySelector("#tablePeserta tbody");
+        tbody.innerHTML = "";
+        const q = document.getElementById("searchPeserta").value.toLowerCase();
+
+        state.pendaftar
+          .filter(
+            (x) =>
+              !q || (x.pengurus + x.kabupaten + x.wa).toLowerCase().includes(q)
+          )
+          .forEach((row, i) => {
+            const tr = document.createElement("tr");
+
+            // Calculate total participants for this entry
+            const totalParticipants =
+              row.hijau + row.kuning + row.merah + row.putih + row.warga;
+
+            // Status badge
+            let statusBadge = "";
+            if (row.status === "lunas") {
+              statusBadge = '<span class="badge badge-success">Lunas</span>';
+            } else if (row.status === "belum") {
+              statusBadge = '<span class="badge badge-danger">Belum</span>';
+            } else {
+              statusBadge = '<span class="badge badge-warning">Menyusul</span>';
+            }
+
+            tr.innerHTML = `<td>${row.id}</td><td>${row.pengurus}</td><td>${row.wa}</td><td>${row.kabupaten} / ${row.kecamatan} / ${row.desa}</td><td>${row.hijau}</td><td>${row.kuning}</td><td>${row.merah}</td><td>${row.putih}</td><td>${row.warga}</td><td><strong>${totalParticipants}</strong></td><td>${statusBadge}</td>`;
+            tbody.appendChild(tr);
+          });
+      }
+
+      function initParticipantChart() {
+        const ctx = document.getElementById("participantChart");
+        if (!ctx) return;
+
+        // Calculate totals for each category
+        let totalHijau = 0;
+        let totalKuning = 0;
+        let totalMerah = 0;
+        let totalPutih = 0;
+        let totalWarga = 0;
+
+        state.pendaftar.forEach((p) => {
+          totalHijau += p.hijau;
+          totalKuning += p.kuning;
+          totalMerah += p.merah;
+          totalPutih += p.putih;
+          totalWarga += p.warga;
+        });
+
+        // Destroy existing chart if it exists
+        if (participantChart) {
+          participantChart.destroy();
+        }
+
+        // Create new chart
+        participantChart = new Chart(ctx, {
+          type: "bar",
+          data: {
+            labels: ["Hijau", "Kuning", "Merah", "Putih", "Warga"],
+            datasets: [
+              {
+                label: "Jumlah Peserta",
+                data: [
+                  totalHijau,
+                  totalKuning,
+                  totalMerah,
+                  totalPutih,
+                  totalWarga,
+                ],
+                backgroundColor: [
+                  "rgba(22, 163, 74, 0.7)",
+                  "rgba(245, 158, 11, 0.7)",
+                  "rgba(220, 38, 38, 0.7)",
+                  "rgba(107, 114, 128, 0.7)",
+                  "rgba(139, 92, 246, 0.7)",
+                ],
+                borderColor: [
+                  "rgba(22, 163, 74, 1)",
+                  "rgba(245, 158, 11, 1)",
+                  "rgba(220, 38, 38, 1)",
+                  "rgba(107, 114, 128, 1)",
+                  "rgba(139, 92, 246, 1)",
+                ],
+                borderWidth: 1,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  precision: 0,
+                },
+              },
+            },
+            plugins: {
+              legend: {
+                display: false,
+              },
+              tooltip: {
+                callbacks: {
+                  label: function (context) {
+                    return `Jumlah: ${context.raw} peserta`;
+                  },
+                },
+              },
+            },
+          },
+        });
+      }
+
+      document
+        .getElementById("searchPeserta")
+        .addEventListener("input", renderPesertaTable);
+      document
+        .getElementById("refreshPesertaTable")
+        .addEventListener("click", () => {
+          renderPesertaTable();
+          showNotification("Tabel peserta berhasil diperbarui", "success");
+        });
+
+      /******************* Pembayaran flow *******************/
+      function populatePendaftarSelect() {
+        const sel = document.getElementById("selectPendaftar");
+        sel.innerHTML = "";
+        state.pendaftar.forEach((p, idx) => {
+          const o = document.createElement("option");
+          o.value = idx;
+          o.textContent = `${p.id} • ${p.pengurus} (${
+            p.kabupaten
+          }) — Rp ${formatRupiah(p.total)}`;
+          sel.appendChild(o);
+        });
+
+        // Lock prices from dashboard
+        document.getElementById("p_hijau").value = state.prices.hijau;
+        document.getElementById("p_kuning").value = state.prices.kuning;
+        document.getElementById("p_merah").value = state.prices.merah;
+        document.getElementById("p_putih").value = state.prices.putih;
+        document.getElementById("p_warga").value = state.prices.warga;
+
+        sel.addEventListener("change", () => {
+          const idx = sel.value;
+          if (idx == null || idx === "") return;
+          const p = state.pendaftar[idx];
+          renderRingkasan(p);
+          updatePaymentCalculation(p);
+        });
+      }
+
+      function updatePaymentCalculation(p) {
+        if (!p) return;
+
+        const prices = state.prices;
+        const totalTagihan =
+          p.hijau * prices.hijau +
+          p.kuning * prices.kuning +
+          p.merah * prices.merah +
+          p.putih * prices.putih +
+          p.warga * prices.warga;
+
+        document.getElementById("totalTagihan").textContent =
+          "Rp " + formatRupiah(totalTagihan);
+
+        // Set nominal dibayarkan ke nilai yang sudah ada atau 0
+        const nominalDibayarkan = document.getElementById("nominalDibayarkan");
+        nominalDibayarkan.value = p.nominal || 0;
+
+        // Calculate sisa kekurangan
+        const sisa = Math.max(0, totalTagihan - (p.nominal || 0));
+        const sisaElement = document.getElementById("sisaKekurangan");
+        sisaElement.textContent = "Rp " + formatRupiah(sisa);
+
+        // Update color based on remaining amount
+        if (sisa > 0) {
+          sisaElement.style.color = "var(--danger)";
+        } else {
+          sisaElement.style.color = "var(--success)";
+          sisaElement.textContent = "Rp 0 (Lunas)";
+        }
+
+        // Add event listener for real-time calculation
+        nominalDibayarkan.oninput = function () {
+          const nominal = Number(this.value) || 0;
+          const sisaBaru = Math.max(0, totalTagihan - nominal);
+          sisaElement.textContent = "Rp " + formatRupiah(sisaBaru);
+
+          if (sisaBaru > 0) {
+            sisaElement.style.color = "var(--danger)";
+          } else {
+            sisaElement.style.color = "var(--success)";
+            sisaElement.textContent = "Rp 0 (Lunas)";
+          }
+        };
+      }
+
+      function renderRingkasan(p) {
+        if (!p) {
+          document.getElementById("ringkasanPembayaran").innerHTML =
+            "Tidak ada pendaftar terpilih";
+          return;
+        }
+
+        const prices = state.prices;
+        const totals = {
+          hijau: p.hijau * prices.hijau,
+          kuning: p.kuning * prices.kuning,
+          merah: p.merah * prices.merah,
+          putih: p.putih * prices.putih,
+          warga: p.warga * prices.warga,
+        };
+        const grand =
+          totals.hijau +
+          totals.kuning +
+          totals.merah +
+          totals.putih +
+          totals.warga +
+          p.nominal;
+
+        document.getElementById(
+          "ringkasanPembayaran"
+        ).innerHTML = `Pengurus: <strong>${p.pengurus}</strong><br/>Hijau: ${
+          p.hijau
+        } x Rp ${formatRupiah(prices.hijau)} = Rp ${formatRupiah(
+          totals.hijau
+        )}<br/>Kuning: ${p.kuning} x Rp ${formatRupiah(
+          prices.kuning
+        )} = Rp ${formatRupiah(totals.kuning)}<br/>Merah: ${
+          p.merah
+        } x Rp ${formatRupiah(prices.merah)} = Rp ${formatRupiah(
+          totals.merah
+        )}<br/>Putih: ${p.putih} x Rp ${formatRupiah(
+          prices.putih
+        )} = Rp ${formatRupiah(totals.putih)}<br/>Warga: ${
+          p.warga
+        } x Rp ${formatRupiah(prices.warga)} = Rp ${formatRupiah(
+          totals.warga
+        )}<br/>Biaya tambahan: Rp ${formatRupiah(
+          p.nominal
+        )}<hr/><strong>Total: Rp ${formatRupiah(grand)}</strong>`;
+      }
+
+      document.getElementById("applyPayment").addEventListener("click", () => {
+        const sel = document.getElementById("selectPendaftar");
+        const idx = sel.value;
+        if (idx === "") return showNotification("Pilih pendaftar", "warning");
+        const p = state.pendaftar[idx];
+
+        // Get nominal dibayarkan
+        const nominalDibayarkan =
+          Number(document.getElementById("nominalDibayarkan").value) || 0;
+
+        // re-calc with current prices
+        const prices = state.prices;
+        const totalTagihan =
+          p.hijau * prices.hijau +
+          p.kuning * prices.kuning +
+          p.merah * prices.merah +
+          p.putih * prices.putih +
+          p.warga * prices.warga;
+
+        // Update nominal pembayaran
+        p.nominal = nominalDibayarkan;
+
+        // Calculate grand total (tagihan + nominal tambahan)
+        const grandTotal = totalTagihan + nominalDibayarkan;
+        p.total = grandTotal;
+        p.totalTagihan = totalTagihan;
+
+        // Update status based on payment
+        if (nominalDibayarkan >= totalTagihan) {
+          p.status = "lunas";
+        } else if (nominalDibayarkan > 0) {
+          p.status = "menyusul";
+        } else {
+          p.status = "belum";
+        }
+
+        // attach/update nota metadata
+        p.nota = {
+          tanggal: new Date().toLocaleString("id-ID"),
+          prices: { ...state.prices },
+          nominalDibayarkan: nominalDibayarkan,
+          totalTagihan: totalTagihan,
+          sisaKekurangan: Math.max(0, totalTagihan - nominalDibayarkan),
+        };
+
+        saveState();
+        renderRingkasan(p);
+        updatePaymentCalculation(p);
+        showNotification(
+          `Pembayaran tersimpan. Status: ${p.status.toUpperCase()}`,
+          "success"
+        );
+      });
+
+      document
+        .getElementById("resetPembayaran")
+        .addEventListener("click", () => {
+          populatePendaftarSelect();
+          document.getElementById("ringkasanPembayaran").innerText =
+            "Tidak ada pendaftar terpilih";
+          document.getElementById("totalTagihan").textContent = "Rp 0";
+          document.getElementById("nominalDibayarkan").value = "0";
+          document.getElementById("sisaKekurangan").textContent = "Rp 0";
+        });
+
+      /******************* Nota List *******************/
+      function renderNotaList() {
+        const container = document.getElementById("notaList");
+        const searchTerm = document
+          .getElementById("searchNota")
+          .value.toLowerCase();
+
+        // Show all entries (not just lunas) for individual printing
+        const filteredPendaftar = state.pendaftar.filter(
+          (p) =>
+            !searchTerm ||
+            p.pengurus.toLowerCase().includes(searchTerm) ||
+            p.id.toLowerCase().includes(searchTerm)
+        );
+
+        if (filteredPendaftar.length === 0) {
+          container.innerHTML =
+            '<div class="muted" style="text-align: center; padding: 40px;"><i class="fas fa-file-invoice" style="font-size: 48px; margin-bottom: 12px; display: block;"></i>Belum ada data pendaftar</div>';
+          return;
+        }
+
+        container.innerHTML = "";
+        filteredPendaftar.forEach((p) => {
+          const card = document.createElement("div");
+          card.className = "nota-card";
+          card.dataset.id = p.id;
+
+          let statusClass = "badge-warning";
+          let statusText = "Menyusul";
+          if (p.status === "lunas") {
+            statusClass = "badge-success";
+            statusText = "Lunas";
+          } else if (p.status === "belum") {
+            statusClass = "badge-danger";
+            statusText = "Belum";
+          }
+
+          card.innerHTML = `
+            <div class="nota-header">
+              <span class="nota-id">${p.id}</span>
+              <span class="nota-status ${statusClass}">${statusText}</span>
+            </div>
+            <div class="nota-details">
+              <div><strong>Pengurus:</strong> ${p.pengurus}</div>
+              <div><strong>WA:</strong> ${p.wa}</div>
+              <div><strong>Lokasi:</strong> ${p.desa}, ${p.kecamatan}</div>
+              <div><strong>Peserta:</strong> H:${p.hijau} K:${p.kuning} M:${
+            p.merah
+          } P:${p.putih} W:${p.warga}</div>
+              ${
+                p.nota && p.nota.nominalDibayarkan
+                  ? `<div><strong>Dibayar:</strong> Rp ${formatRupiah(
+                      p.nota.nominalDibayarkan
+                    )}</div>`
+                  : ""
+              }
+              ${
+                p.nota && p.nota.sisaKekurangan > 0
+                  ? `<div><strong>Sisa:</strong> Rp ${formatRupiah(
+                      p.nota.sisaKekurangan
+                    )}</div>`
+                  : ""
+              }
+            </div>
+            <div class="nota-total">Total: Rp ${formatRupiah(p.total)}</div>
+          `;
+
+          card.addEventListener("click", () => {
+            // Toggle selection
+            document
+              .querySelectorAll(".nota-card")
+              .forEach((c) => c.classList.remove("selected"));
+            card.classList.add("selected");
+            selectedNotaId = p.id;
+          });
+
+          container.appendChild(card);
+        });
+      }
+
+      document
+        .getElementById("searchNota")
+        .addEventListener("input", renderNotaList);
+
+      document.getElementById("printSelected").addEventListener("click", () => {
+        if (!selectedNotaId) {
+          showNotification("Pilih nota terlebih dahulu", "warning");
+          return;
+        }
+
+        const p = state.pendaftar.find((m) => m.id === selectedNotaId);
+        if (p) {
+          generateNota(p);
+          setTimeout(() => {
+            downloadReceiptPDF();
+          }, 500);
+        }
+      });
+
+      /******************* Nota generation & signature *******************/
+      let receiptArea = null;
+
+      function generateNota(p) {
+        // Create receipt area if not exists
+        if (!receiptArea) {
+          receiptArea = document.createElement("div");
+          receiptArea.id = "receiptArea";
+          receiptArea.className = "receipt card";
+          receiptArea.style.maxWidth = "800px";
+          receiptArea.style.margin = "0 auto";
+          receiptArea.style.display = "none";
+          document.body.appendChild(receiptArea);
+        }
+
+        // Calculate totals for display
+        const prices = state.prices;
+        const totalTagihan =
+          p.totalTagihan ||
+          p.hijau * prices.hijau +
+            p.kuning * prices.kuning +
+            p.merah * prices.merah +
+            p.putih * prices.putih +
+            p.warga * prices.warga;
+
+        const nominalDibayarkan = p.nota?.nominalDibayarkan || p.nominal || 0;
+        const sisaKekurangan = Math.max(0, totalTagihan - nominalDibayarkan);
+
+        // simple bank-like nota
+        const html = `
+        <div style="padding:16px;font-family:Plus Jakarta Sans,Arial">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <h2 style="margin:0">PAGAR NUSA BUMI PANJALU</h2>
+              <div class="muted">Bukti Pembayaran / Nota</div>
+            </div>
+            <div style="text-align:right">
+              <div>No. Nota: ${p.id}</div>
+              <div>Tanggal: ${
+                p.nota?.tanggal || new Date().toLocaleString("id-ID")
+              }</div>
+            </div>
+          </div>
+          <hr/>
+          <div style="margin-top:8px">
+            <strong>Pengurus:</strong> ${p.pengurus}<br/>
+            <strong>WA:</strong> ${p.wa}<br/>
+            <strong>Lokasi:</strong> ${p.kabupaten} / ${p.kecamatan} / ${p.desa}
+          </div>
+
+          <table style="width:100%;margin-top:12px">
+            <thead><tr><th>Item</th><th>Jumlah</th><th>Harga</th><th>Subtotal</th></tr></thead>
+            <tbody>
+              <tr><td>Hijau</td><td>${p.hijau}</td><td>Rp ${formatRupiah(
+          p.nota?.prices?.hijau || state.prices.hijau
+        )}</td><td style="text-align:right">Rp ${formatRupiah(
+          p.hijau * (p.nota?.prices?.hijau || state.prices.hijau)
+        )}</td></tr>
+              <tr><td>Kuning</td><td>${p.kuning}</td><td>Rp ${formatRupiah(
+          p.nota?.prices?.kuning || state.prices.kuning
+        )}</td><td style="text-align:right">Rp ${formatRupiah(
+          p.kuning * (p.nota?.prices?.kuning || state.prices.kuning)
+        )}</td></tr>
+              <tr><td>Merah</td><td>${p.merah}</td><td>Rp ${formatRupiah(
+          p.nota?.prices?.merah || state.prices.merah
+        )}</td><td style="text-align:right">Rp ${formatRupiah(
+          p.merah * (p.nota?.prices?.merah || state.prices.merah)
+        )}</td></tr>
+              <tr><td>Putih</td><td>${p.putih}</td><td>Rp ${formatRupiah(
+          p.nota?.prices?.putih || state.prices.putih
+        )}</td><td style="text-align:right">Rp ${formatRupiah(
+          p.putih * (p.nota?.prices?.putih || state.prices.putih)
+        )}</td></tr>
+              <tr><td>Warga</td><td>${p.warga}</td><td>Rp ${formatRupiah(
+          p.nota?.prices?.warga || state.prices.warga
+        )}</td><td style="text-align:right">Rp ${formatRupiah(
+          p.warga * (p.nota?.prices?.warga || state.prices.warga)
+        )}</td></tr>
+              <tr><td>Biaya Tambahan</td><td>-</td><td>-</td><td style="text-align:right">Rp ${formatRupiah(
+                p.nominal
+              )}</td></tr>
+            </tbody>
+          </table>
+          
+          <div style="margin-top:12px">
+            <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+              <span><strong>Total Tagihan:</strong></span>
+              <span style="font-weight:bold">Rp ${formatRupiah(
+                totalTagihan
+              )}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+              <span><strong>Nominal Dibayarkan:</strong></span>
+              <span style="font-weight:bold;color:var(--success)">Rp ${formatRupiah(
+                nominalDibayarkan
+              )}</span>
+            </div>
+            ${
+              sisaKekurangan > 0
+                ? `
+            <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+              <span><strong>Sisa Kekurangan:</strong></span>
+              <span style="font-weight:bold;color:var(--danger)">Rp ${formatRupiah(
+                sisaKekurangan
+              )}</span>
+            </div>`
+                : ""
+            }
+          </div>
+          
+          <hr/>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div class="muted">Terima kasih telah melakukan pembayaran.</div>
+              <div style="margin-top:8px">Keterangan: ${
+                p.keterangan || "-"
+              }</div>
+              <div style="margin-top:8px">Status: <strong>${
+                p.status === "lunas"
+                  ? "LUNAS"
+                  : p.status === "belum"
+                  ? "BELUM BAYAR"
+                  : "MENYUSUL"
+              }</strong></div>
+            </div>
+            <div style="text-align:right">
+              <h3>Total: Rp ${formatRupiah(p.total)}</h3>
+              <div style="margin-top:18px">Penerima,<br/><br/><canvas id="sigSmall" width="220" height="60" style="border:1px dashed #eee;border-radius:6px"></canvas><div class="muted">(TTD elektronik)</div></div>
+            </div>
+          </div>
+        </div>
+      `;
+        receiptArea.innerHTML = html;
+        receiptArea.style.display = "block";
+
+        // draw small signature if exists
+        const sigSmall = document.getElementById("sigSmall");
+        if (sigSmall) {
+          const ctx = sigSmall.getContext("2d");
+          ctx.clearRect(0, 0, sigSmall.width, sigSmall.height);
+          if (p.nota && p.nota.signature) {
+            const img = new Image();
+            img.onload = () => {
+              ctx.drawImage(img, 0, 0, sigSmall.width, sigSmall.height);
+            };
+            img.src = p.nota.signature;
+          }
+        }
+      }
+
+      // download single receipt
+      function downloadReceiptPDF() {
+        const element = receiptArea;
+        const opt = {
+          margin: 0.3,
+          filename: `nota_${selectedNotaId || "PagarNusa"}.pdf`,
+          image: { type: "jpeg", quality: 0.98 },
+          html2canvas: { scale: 2 },
+          jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
+        };
+        html2pdf().set(opt).from(element).save();
+      }
+
+      // signature modal handling (simple freehand)
+      const sigModal = document.getElementById("sigModal");
+      const sigCanvas = document.getElementById("sigCanvas");
+      const sctx = sigCanvas.getContext("2d");
+      let drawing = false;
+
+      sigCanvas.addEventListener("mousedown", (e) => {
+        drawing = true;
+        sctx.beginPath();
+        sctx.moveTo(e.offsetX, e.offsetY);
+      });
+
+      sigCanvas.addEventListener("mousemove", (e) => {
+        if (!drawing) return;
+        sctx.lineTo(e.offsetX, e.offsetY);
+        sctx.stroke();
+      });
+
+      sigCanvas.addEventListener("mouseup", (e) => {
+        drawing = false;
+      });
+
+      sigCanvas.addEventListener("mouseleave", () => {
+        drawing = false;
+      });
+
+      function openSignatureModal(p) {
+        sigModal.style.display = "flex";
+        sctx.lineWidth = 2;
+        sctx.strokeStyle = "#000";
+        sctx.clearRect(0, 0, sigCanvas.width, sigCanvas.height);
+
+        // load existing signature if exists
+        if (p.nota && p.nota.signature) {
+          const img = new Image();
+          img.onload = () => {
+            sctx.drawImage(img, 0, 0, sigCanvas.width, sigCanvas.height);
+          };
+          img.src = p.nota.signature;
+        }
+      }
+
+      document.getElementById("closeSig").addEventListener("click", () => {
+        sigModal.style.display = "none";
+      });
+
+      document.getElementById("clearSig").addEventListener("click", () => {
+        sctx.clearRect(0, 0, sigCanvas.width, sigCanvas.height);
+      });
+
+      document.getElementById("saveSig").addEventListener("click", () => {
+        const dataUrl = sigCanvas.toDataURL("image/png");
+        // Save to most recently generated nota
+        if (receiptArea) {
+          // Find pendaftar based on receipt content
+          const receiptContent = receiptArea.innerHTML;
+          const idMatch = receiptContent.match(/No\. Nota: (P-\d+)/);
+          if (idMatch) {
+            const id = idMatch[1];
+            const p = state.pendaftar.find((m) => m.id === id);
+            if (p) {
+              p.nota = p.nota || {};
+              p.nota.signature = dataUrl;
+              saveState();
+              showNotification("Tanda tangan berhasil disimpan", "success");
+            }
+          }
+        }
+        sigModal.style.display = "none";
+      });
+
+      // bulk download
+      document.getElementById("downloadAll").addEventListener("click", () => {
+        if (
+          !confirm(
+            "Unduh semua nota sebagai PDF? Aksi ini akan men-generate satu per satu."
+          )
+        )
+          return;
+        if (state.pendaftar.length === 0)
+          return showNotification("Belum ada data", "warning");
+
+        state.pendaftar.forEach((p, i) => {
+          generateNota(p);
+          setTimeout(() => {
+            downloadReceiptPDF();
+          }, i * 1200);
+        });
+      });
+
+      // export CSV
+      document.getElementById("exportCSV").addEventListener("click", () => {
+        if (state.pendaftar.length === 0)
+          return showNotification("Tidak ada data", "warning");
+
+        const keys = [
+          "id",
+          "pengurus",
+          "wa",
+          "kabupaten",
+          "kecamatan",
+          "desa",
+          "hijau",
+          "kuning",
+          "merah",
+          "putih",
+          "warga",
+          "status",
+          "total",
+          "keterangan",
+        ];
+
+        const rows = [keys.join(",")]
+          .concat(
+            state.pendaftar.map((r) =>
+              keys
+                .map((k) => `"${(r[k] || "").toString().replace(/"/g, '""')}"`)
+                .join(",")
+            )
+          )
+          .join("\n");
+
+        const blob = new Blob([rows], { type: "text/csv" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "pendaftar.csv";
+        a.click();
+
+        showNotification("CSV berhasil diunduh", "success");
+      });
+
+      /******************* Price saving with password *******************/
+      const passwordModal = document.getElementById("passwordModal");
+      const passwordInput = document.getElementById("passwordInput");
+
+      document.getElementById("savePrices").addEventListener("click", () => {
+        passwordModal.style.display = "flex";
+        passwordInput.value = "";
+        passwordInput.focus();
+      });
+
+      document
+        .getElementById("cancelPassword")
+        .addEventListener("click", () => {
+          passwordModal.style.display = "none";
+        });
+
+      document
+        .getElementById("confirmPassword")
+        .addEventListener("click", () => {
+          if (passwordInput.value === ADMIN_PASSWORD) {
+            state.prices.hijau =
+              Number(document.getElementById("priceHijau").value) ||
+              state.prices.hijau;
+            state.prices.kuning =
+              Number(document.getElementById("priceKuning").value) ||
+              state.prices.kuning;
+            state.prices.merah =
+              Number(document.getElementById("priceMerah").value) ||
+              state.prices.merah;
+            state.prices.putih =
+              Number(document.getElementById("pricePutih").value) ||
+              state.prices.putih;
+            state.prices.warga =
+              Number(document.getElementById("priceWarga").value) ||
+              state.prices.warga;
+
+            saveState();
+            showNotification("Harga berhasil disimpan", "success");
+            passwordModal.style.display = "none";
+          } else {
+            showNotification("Password salah!", "error");
+            passwordInput.select();
+          }
+        });
+
+      // Handle Enter key in password input
+      passwordInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+          document.getElementById("confirmPassword").click();
+        }
+      });
+
+      /******************* Summary *******************/
+      function renderSummary() {
+        document.getElementById("summaryCount").innerText =
+          state.pendaftar.length;
+        const total = state.pendaftar.reduce(
+          (s, x) => s + (Number(x.total) || 0),
+          0
+        );
+        document.getElementById("summaryTotal").innerText =
+          "Rp " + formatRupiah(total);
+
+        // set price inputs
+        document.getElementById("priceHijau").value = state.prices.hijau;
+        document.getElementById("priceKuning").value = state.prices.kuning;
+        document.getElementById("priceMerah").value = state.prices.merah;
+        document.getElementById("pricePutih").value = state.prices.putih;
+        document.getElementById("priceWarga").value = state.prices.warga;
+      }
+
+      // Buat Nota button in pembayaran
+      document.getElementById("buatNota").addEventListener("click", () => {
+        const sel = document.getElementById("selectPendaftar");
+        const idx = sel.value;
+        if (idx === "")
+          return showNotification("Pilih pendaftar dulu", "warning");
+        const p = state.pendaftar[idx];
+        generateNota(p);
+        showView("nota");
+        setTimeout(() => {
+          downloadReceiptPDF();
+        }, 500);
+      });
+
+      // Add shake animation for wrong password
+      const style = document.createElement("style");
+      style.textContent = `
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+          20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        .shake {
+          animation: shake 0.5s;
+        }
+      `;
+      document.head.appendChild(style);
+
+      // initial load
+      fillLokasi();
+      loadState();
+      renderTable();
+
+      // Handle window resize for responsive behavior
+      window.addEventListener("resize", () => {
+        if (window.innerWidth > 768) {
+          closeMobileMenu();
+        }
+      });
+
+      // Session timeout for Data Anggota access (30 minutes)
+      setInterval(() => {
+        if (dataAnggotaAccessGranted) {
+          dataAnggotaAccessGranted = false;
+          showNotification("Sesi akses Data Anggota telah berakhir", "warning");
+        }
+      }, 30 * 60 * 1000); // 30 minutes
+    </script>
+  </body>
+</html>
